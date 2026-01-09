@@ -25,6 +25,29 @@ This application recreates the existing Cognito Forms art request form as a mode
 - **Development/Testing**: https://requests.whitestonebranding.com
 - **Production**: https://hub.whitestonebranding.com/artreq (after testing)
 
+### Getting Started with Deployment
+
+For first-time deployment, follow these guides in order:
+
+1. **[CREDENTIALS_SETUP.md](CREDENTIALS_SETUP.md)** - Set up all API credentials (Firebase, Google Drive, Asana, etc.)
+2. **[DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - Step-by-step deployment checklist
+3. **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide with detailed procedures
+4. **[MIGRATION_PLAN.md](MIGRATION_PLAN.md)** - 5-week migration strategy from Cognito Forms
+
+### Quick Credential Validation
+
+After setting up credentials, validate them before deployment:
+
+```bash
+# Install dependencies (if not already done)
+npm install
+
+# Validate all credentials and API connections
+node -r dotenv/config scripts/validate-credentials.js dotenv_config_path=.env.production
+```
+
+This will test all Firebase, Google Drive, Asana, CommonSKU, and Slack connections.
+
 ## Features
 
 ### Core Form Features
@@ -113,14 +136,14 @@ art-request-form/
 See [Implementation Plan](/Users/todellington/.claude/plans/virtual-percolating-cherny.md) for detailed roadmap.
 
 ### Phases
-- [x] Phase 0: Repository Setup (Day 1)
-- [ ] Phase 1: Foundation & Setup (Week 1-2)
-- [ ] Phase 2: Form Structure & Basic Steps (Week 3-4)
-- [ ] Phase 3: Advanced Features (Week 5-6)
-- [ ] Phase 4: Backend Integrations (Week 7-8)
-- [ ] Phase 5: Admin Dashboard (Week 9-10)
-- [ ] Phase 6: Testing & Polish (Week 11-12)
-- [ ] Phase 7: Deployment & Migration (Week 13-14)
+- [x] Phase 0: Repository Setup
+- [x] Phase 1: Foundation & Setup
+- [x] Phase 2: Form Structure & Basic Steps
+- [x] Phase 3: Advanced Features
+- [x] Phase 4: Backend Integrations
+- [x] Phase 5: Admin Dashboard
+- [x] Phase 6: Testing & Polish
+- [x] Phase 7: Deployment & Migration (Documentation & Configuration Complete)
 
 ## Testing
 
@@ -137,18 +160,40 @@ npm run test:coverage
 
 ## Deployment
 
-### Development (requests.whitestonebranding.com)
+### Quick Deploy to Production
+
 ```bash
-npm run build
-pm2 start ecosystem.config.js
+# Automated deployment (from local machine)
+./scripts/deploy.sh production
 ```
 
-### Production (hub.whitestonebranding.com/artreq)
-After successful testing on requests subdomain, production cutover involves:
-1. Updating ASANA_PROJECT_ID to production board
-2. Adding Nginx redirect from /artreq to requests.whitestonebranding.com
+The deployment script handles:
+- Git verification and push
+- SSH to server
+- Pull latest code
+- Install dependencies
+- Build application
+- Zero-downtime PM2 reload
+- Health check verification
 
-See [Migration Plan](/Users/todellington/.claude/plans/virtual-percolating-cherny.md#migration-plan) for details.
+### First-Time Setup
+
+For initial server setup, see **[DEPLOYMENT.md](DEPLOYMENT.md)** for complete guide including:
+- VPS server setup
+- Node.js, PM2, and Nginx installation
+- SSL certificate configuration (Let's Encrypt)
+- Environment variable setup
+- Initial deployment
+
+### Migration from Cognito Forms
+
+See **[MIGRATION_PLAN.md](MIGRATION_PLAN.md)** for complete migration strategy including:
+- 5-week migration timeline
+- Testing procedures
+- Parallel running phase
+- Communication plan
+- Rollback procedures
+- Success metrics
 
 ## Key Improvements Over Cognito Forms
 
@@ -173,11 +218,45 @@ See [Migration Plan](/Users/todellington/.claude/plans/virtual-percolating-chern
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
+## Deployment Quick Reference
+
+### Common Commands
+
+```bash
+# Deploy to production
+./scripts/deploy.sh production
+
+# SSH to server
+ssh deploy@requests.whitestonebranding.com
+
+# Check application status
+ssh deploy@requests.whitestonebranding.com 'pm2 status'
+
+# View logs
+ssh deploy@requests.whitestonebranding.com 'pm2 logs art-request-form'
+
+# Restart application
+ssh deploy@requests.whitestonebranding.com 'pm2 restart art-request-form'
+
+# Health check
+curl https://requests.whitestonebranding.com/api/health
+```
+
+### Monitoring
+
+- **Health Check**: https://requests.whitestonebranding.com/api/health
+- **PM2 Status**: `pm2 status`
+- **Application Logs**: `pm2 logs art-request-form`
+- **Nginx Logs**: `/var/log/nginx/art-request-form-*.log`
+- **Slack Alerts**: #tech-alert channel
+
 ## Support
 
 For issues or questions:
 - GitHub Issues: https://github.com/mrtellington/art-request-form/issues
 - Slack: #tech-alert channel
+- Deployment Guide: [DEPLOYMENT.md](DEPLOYMENT.md)
+- Security: [SECURITY.md](SECURITY.md)
 
 ## Acknowledgments
 
