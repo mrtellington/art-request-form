@@ -40,9 +40,7 @@ export function AttachmentsStep() {
     <div className="space-y-8">
       {/* File Attachments */}
       <div>
-        <Label className="text-base font-semibold mb-3 block">
-          Attachments or Logos
-        </Label>
+        <Label className="text-base font-semibold mb-3 block">Attachments or Logos</Label>
         <p className="text-sm text-zinc-600 mb-4">
           Upload any files, logos, or reference materials
         </p>
@@ -71,6 +69,7 @@ export function AttachmentsStep() {
           minItems={0}
           addButtonLabel="Add Website Link"
           cloneButtonLabel="Clone Link"
+          hideItemLabels
         />
       </div>
     </div>

@@ -163,9 +163,8 @@ export async function createGoogleDriveFolderStructure(formData: FormData): Prom
   // Step 3: Find or create year folder (e.g., "2026")
   const yearFolderId = await findOrCreateFolder(drive, clientFolderId, year);
 
-  // Step 4: Create request folder (always create new - include date for uniqueness)
-  const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-  const requestFolderName = `${date} - ${requestTitle}`;
+  // Step 4: Create request folder (always create new - just use request title)
+  const requestFolderName = requestTitle;
   const requestFolderId = await createFolder(drive, yearFolderId, requestFolderName);
 
   // Step 5: Create subfolders (Blanks, Edits, Proof, Attachments)
@@ -201,6 +200,7 @@ export async function createGoogleDriveFolderStructure(formData: FormData): Prom
 /**
  * Upload a single file to Google Drive folder
  * Returns file ID and URL
+ * Supports both File objects (client-side) and base64 data (server-side)
  */
 export async function uploadFileToDrive(
   file: FileAttachment,
@@ -209,29 +209,39 @@ export async function uploadFileToDrive(
   try {
     const drive = getDriveClient();
 
-    if (!file.file) {
-      throw new Error('File object is missing from attachment');
+    // Get file buffer from either File object or base64 data
+    let buffer: Buffer;
+
+    if (file.base64Data) {
+      // Decode base64 data to buffer
+      buffer = Buffer.from(file.base64Data, 'base64');
+    } else if (file.file) {
+      // Convert File to Buffer for upload (client-side fallback)
+      const arrayBuffer = await file.file.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+    } else {
+      throw new Error('File data is missing - no base64Data or file object');
     }
 
     const sanitizedName = sanitizeFilename(file.name);
-
-    // Convert File to Buffer for upload
-    const arrayBuffer = await file.file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
 
     const fileMetadata = {
       name: sanitizedName,
       parents: [folderId],
     };
 
-    const media = {
-      mimeType: file.mimeType,
-      body: buffer,
-    };
+    // Use Readable stream for the upload
+    const { Readable } = await import('stream');
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
 
     const uploadedFile = await drive.files.create({
       requestBody: fileMetadata,
-      media: media,
+      media: {
+        mimeType: file.mimeType,
+        body: stream,
+      },
       fields: 'id, webViewLink',
       supportsAllDrives: true,
     });

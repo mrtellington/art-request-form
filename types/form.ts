@@ -23,6 +23,8 @@ export type RiseAndShineLevel = 'Bronze' | 'Silver' | 'Gold';
 
 export type Label = 'Call Needed' | 'Rush' | 'Needs Creative';
 
+export type ClientType = 'Prospect' | 'Client' | 'Enterprise';
+
 /**
  * Product interface - uses object structure instead of parallel arrays
  * This solves the Cognito Forms data misalignment problem
@@ -56,7 +58,8 @@ export interface FileAttachment {
   name: string;
   size: number;
   mimeType: string;
-  file?: File; // During upload
+  file?: File; // During upload (client-side only, not serializable)
+  base64Data?: string; // Base64 encoded file data for server transfer
   driveFileId?: string; // After upload to Google Drive
   driveUrl?: string;
   localUrl?: string; // Blob URL for preview
@@ -87,7 +90,7 @@ export interface FormData {
   projectNumber?: string;
   projectValue: ProjectValue | null;
   billable: Billable | null;
-  clientType: string | null;
+  clientType: ClientType | null;
 
   // Collaborators
   addCollaborators: boolean;

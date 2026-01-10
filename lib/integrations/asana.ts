@@ -10,6 +10,16 @@ import { buildAsanaDescription, formatCustomFields } from '@/lib/utils/formatter
 
 const ASANA_API_URL = 'https://app.asana.com/api/1.0';
 
+// Asana tag GIDs for labels
+const ASANA_TAGS = {
+  'Call Needed': process.env.ASANA_TAG_CALL_NEEDED || '',
+  Rush: process.env.ASANA_TAG_RUSH || '',
+  'Needs Creative': process.env.ASANA_TAG_NEEDS_CREATIVE || '',
+} as Record<string, string>;
+
+// Cache for user GID lookups
+const userGidCache = new Map<string, string | null>();
+
 /**
  * Get Asana API headers
  */
@@ -24,6 +34,60 @@ function getAsanaHeaders(): HeadersInit {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
   };
+}
+
+/**
+ * Look up Asana user GID by email address
+ * Returns null if user not found
+ */
+export async function getUserGidByEmail(email: string): Promise<string | null> {
+  // Check cache first
+  if (userGidCache.has(email)) {
+    return userGidCache.get(email) || null;
+  }
+
+  try {
+    const workspaceId = process.env.ASANA_WORKSPACE_ID;
+    if (!workspaceId) {
+      console.warn('ASANA_WORKSPACE_ID not set, cannot look up user');
+      return null;
+    }
+
+    const response = await fetch(
+      `${ASANA_API_URL}/workspaces/${workspaceId}/users?opt_fields=email,name`,
+      { headers: getAsanaHeaders() }
+    );
+
+    if (!response.ok) {
+      console.error('Failed to fetch Asana users');
+      return null;
+    }
+
+    const result = await response.json();
+    const users = result.data || [];
+
+    // Find user by email (case-insensitive)
+    const user = users.find(
+      (u: { email?: string; gid: string }) =>
+        u.email?.toLowerCase() === email.toLowerCase()
+    );
+
+    const gid = user?.gid || null;
+    userGidCache.set(email, gid);
+    return gid;
+  } catch (error) {
+    console.error('Error looking up Asana user:', error);
+    userGidCache.set(email, null);
+    return null;
+  }
+}
+
+/**
+ * Validate that an email exists as an active Asana user
+ */
+export async function validateAsanaUser(email: string): Promise<boolean> {
+  const gid = await getUserGidByEmail(email);
+  return gid !== null;
 }
 
 /**
@@ -52,19 +116,74 @@ export async function createAsanaTask(
     // Build custom fields (now with actual GIDs)
     const customFields = formatCustomFields(formData, googleDriveFolderUrl);
 
+    // Look up requestor GID and add to custom fields
+    if (formData.requestorEmail) {
+      const requestorGid = await getUserGidByEmail(formData.requestorEmail);
+      if (requestorGid) {
+        // Requestor is a people field - needs special format
+        customFields['1211831707949808'] = requestorGid;
+      }
+    }
+
     // Prepare task data with HTML notes for rich text
     // Wrap description in <body> tags as required by Asana
     const htmlNotes = `<body>${description}</body>`;
 
-    const taskData = {
+    // Build due date/time - use due_at if time is provided, otherwise due_on
+    let dueOn: string | undefined;
+    let dueAt: string | undefined;
+
+    if (formData.dueDate) {
+      if (formData.dueTime) {
+        // Combine date and time into ISO 8601 datetime (Eastern time)
+        // Format: 2026-01-19T18:00:00-05:00
+        dueAt = `${formData.dueDate}T${formData.dueTime}:00-05:00`;
+      } else {
+        dueOn = formData.dueDate;
+      }
+    }
+
+    // Collect tag GIDs for selected labels
+    const tagGids: string[] = [];
+    if (formData.labels && formData.labels.length > 0) {
+      for (const label of formData.labels) {
+        const tagGid = ASANA_TAGS[label];
+        if (tagGid) {
+          tagGids.push(tagGid);
+        }
+      }
+    }
+
+    const taskData: {
+      data: {
+        name: string;
+        html_notes: string;
+        projects: string[];
+        due_on?: string;
+        due_at?: string;
+        custom_fields: Record<string, string | number>;
+        tags?: string[];
+      };
+    } = {
       data: {
         name: formData.requestTitle || 'Untitled Art Request',
         html_notes: htmlNotes,
         projects: [projectId],
-        due_on: formData.dueDate || undefined,
         custom_fields: customFields,
       },
     };
+
+    // Add due date or datetime
+    if (dueAt) {
+      taskData.data.due_at = dueAt;
+    } else if (dueOn) {
+      taskData.data.due_on = dueOn;
+    }
+
+    // Add tags if any
+    if (tagGids.length > 0) {
+      taskData.data.tags = tagGids;
+    }
 
     // Create task
     const response = await fetch(`${ASANA_API_URL}/tasks`, {
@@ -155,21 +274,49 @@ export async function attachUrlToTask(
 }
 
 /**
- * Add followers to an Asana task
+ * Add followers to an Asana task by looking up user GIDs
  */
 export async function addFollowersToTask(
   taskId: string,
-  followers: string[]
+  emails: string[]
 ): Promise<void> {
   try {
-    // Asana API expects user GIDs, not email addresses
-    // In a production environment, you would need to:
-    // 1. Map email addresses to Asana user GIDs
-    // 2. Use the /users endpoint to find users by email
-    // For now, we'll add this as a comment instead
+    if (!emails || emails.length === 0) return;
 
-    if (followers.length > 0) {
-      const comment = `Collaborators to notify: ${followers.join(', ')}`;
+    // Look up GIDs for each email
+    const followerGids: string[] = [];
+    const notFoundEmails: string[] = [];
+
+    for (const email of emails) {
+      const gid = await getUserGidByEmail(email);
+      if (gid) {
+        followerGids.push(gid);
+      } else {
+        notFoundEmails.push(email);
+      }
+    }
+
+    // Add followers via API if we found any
+    if (followerGids.length > 0) {
+      const response = await fetch(`${ASANA_API_URL}/tasks/${taskId}/addFollowers`, {
+        method: 'POST',
+        headers: getAsanaHeaders(),
+        body: JSON.stringify({
+          data: {
+            followers: followerGids,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error adding followers:', errorData);
+      }
+    }
+
+    // Add comment for any emails not found in Asana
+    if (notFoundEmails.length > 0) {
+      const comment = `Note: These collaborators are not in Asana: ${notFoundEmails.join(', ')}`;
       await addCommentToTask(taskId, comment);
     }
   } catch (error) {
@@ -190,13 +337,26 @@ export async function handleAsanaIntegration(
   // Create task
   const { taskId, taskUrl } = await createAsanaTask(formData, googleDriveFolderUrl);
 
-  // Add followers/collaborators
+  // Build list of followers: requestor + collaborators
+  const followersToAdd: string[] = [];
+
+  // Add requestor as follower
+  if (formData.requestorEmail) {
+    followersToAdd.push(formData.requestorEmail);
+  }
+
+  // Add collaborators as followers
   if (
     formData.addCollaborators &&
     formData.collaborators &&
     formData.collaborators.length > 0
   ) {
-    await addFollowersToTask(taskId, formData.collaborators);
+    followersToAdd.push(...formData.collaborators);
+  }
+
+  // Add all followers at once
+  if (followersToAdd.length > 0) {
+    await addFollowersToTask(taskId, followersToAdd);
   }
 
   // Attach individual files if they were uploaded

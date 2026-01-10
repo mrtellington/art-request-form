@@ -23,6 +23,7 @@ interface RepeatableSectionProps<T extends { id: string }> {
   minItems?: number;
   addButtonLabel?: string;
   cloneButtonLabel?: string;
+  hideItemLabels?: boolean;
 }
 
 export function RepeatableSection<T extends { id: string }>({
@@ -37,6 +38,7 @@ export function RepeatableSection<T extends { id: string }>({
   minItems = 0,
   addButtonLabel = 'Add Blank',
   cloneButtonLabel = 'Clone',
+  hideItemLabels = false,
 }: RepeatableSectionProps<T>) {
   const canRemove = items.length > minItems;
 
@@ -45,9 +47,7 @@ export function RepeatableSection<T extends { id: string }>({
       {/* Section Header */}
       <div>
         <h3 className="text-lg font-semibold text-zinc-900">{title}</h3>
-        {description && (
-          <p className="text-sm text-zinc-600 mt-1">{description}</p>
-        )}
+        {description && <p className="text-sm text-zinc-600 mt-1">{description}</p>}
       </div>
 
       {/* Items */}
@@ -55,11 +55,15 @@ export function RepeatableSection<T extends { id: string }>({
         {items.map((item, index) => (
           <Card key={item.id} className="p-4">
             {/* Item Header */}
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-zinc-700">
-                Item {index + 1}
-              </span>
-              <div className="flex gap-2">
+            <div
+              className={`flex items-center justify-between ${hideItemLabels ? 'mb-2' : 'mb-4'}`}
+            >
+              {!hideItemLabels && (
+                <span className="text-sm font-medium text-zinc-700">
+                  Item {index + 1}
+                </span>
+              )}
+              <div className={`flex gap-2 ${hideItemLabels ? 'ml-auto' : ''}`}>
                 {/* Clone Button */}
                 <Button
                   type="button"
@@ -90,7 +94,7 @@ export function RepeatableSection<T extends { id: string }>({
 
             {/* Item Content */}
             <div>
-              {renderItem(item, index, (updated) => {
+              {renderItem(item, index, (_updated) => {
                 // Update callback handled by parent
               })}
             </div>

@@ -65,9 +65,7 @@ export function FileUpload({ files, onFilesChange }: FileUploadProps) {
           <p className="text-sm font-medium text-zinc-700 mb-1">
             Click to upload or drag and drop
           </p>
-          <p className="text-xs text-zinc-500">
-            PDF, PNG, JPG, or any file type
-          </p>
+          <p className="text-xs text-zinc-500">PDF, PNG, JPG, or any file type</p>
         </label>
       </div>
 
@@ -87,9 +85,7 @@ export function FileUpload({ files, onFilesChange }: FileUploadProps) {
                       <p className="text-sm font-medium text-zinc-900 truncate">
                         {file.name}
                       </p>
-                      <p className="text-xs text-zinc-500">
-                        {formatFileSize(file.size)}
-                      </p>
+                      <p className="text-xs text-zinc-500">{formatFileSize(file.size)}</p>
                     </div>
                   </div>
                   <button
@@ -105,15 +101,6 @@ export function FileUpload({ files, onFilesChange }: FileUploadProps) {
           </div>
         </div>
       )}
-
-      {/* Note about Phase 4 */}
-      <div className="bg-blue-50 border border-blue-200 text-blue-800 px-3 py-2 rounded text-xs">
-        <p className="font-medium">Phase 4 Note</p>
-        <p className="mt-1">
-          Files are selected but upload to Google Drive will be implemented in
-          Phase 4: Backend Integrations.
-        </p>
-      </div>
     </div>
   );
 }

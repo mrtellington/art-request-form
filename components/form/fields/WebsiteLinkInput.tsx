@@ -49,10 +49,7 @@ export function WebsiteLinkInput({ link, onChange }: WebsiteLinkInputProps) {
         <Label htmlFor={`link-type-${link.id}`}>
           Type <span className="text-red-500">*</span>
         </Label>
-        <Select
-          value={link.type}
-          onValueChange={(value) => handleChange('type', value)}
-        >
+        <Select value={link.type} onValueChange={(value) => handleChange('type', value)}>
           <SelectTrigger id={`link-type-${link.id}`}>
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
@@ -73,7 +70,7 @@ export function WebsiteLinkInput({ link, onChange }: WebsiteLinkInputProps) {
         </Label>
         <Input
           id={`link-url-${link.id}`}
-          type="url"
+          type="text"
           value={link.url}
           onChange={(e) => handleChange('url', e.target.value)}
           placeholder="https://..."

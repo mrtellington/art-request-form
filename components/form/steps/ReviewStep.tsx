@@ -46,7 +46,8 @@ export function ReviewStep() {
       <div>
         <h2 className="text-xl font-semibold text-zinc-900">Review Your Request</h2>
         <p className="text-sm text-zinc-600 mt-1">
-          Please review all information before submitting. You can go back to any step to make changes.
+          Please review all information before submitting. You can go back to any step to
+          make changes.
         </p>
       </div>
 
@@ -56,40 +57,56 @@ export function ReviewStep() {
         <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <dt className="text-sm font-medium text-zinc-500">Request Type</dt>
-            <dd className="mt-1 text-base text-zinc-900">{formData.requestType || 'Not specified'}</dd>
+            <dd className="mt-1 text-base text-zinc-900">
+              {formData.requestType || 'Not specified'}
+            </dd>
           </div>
           <div>
             <dt className="text-sm font-medium text-zinc-500">Client Name</dt>
             <dd className="mt-1 text-base text-zinc-900">
               {formData.clientName || 'Not specified'}
               {formData.clientExists && (
-                <span className="ml-2 text-xs text-green-600">(Verified in CommonSKU)</span>
+                <span className="ml-2 text-xs text-green-600">
+                  (Verified in commonsku)
+                </span>
               )}
             </dd>
           </div>
           <div>
             <dt className="text-sm font-medium text-zinc-500">Request Title</dt>
-            <dd className="mt-1 text-base text-zinc-900">{formData.requestTitle || 'Not specified'}</dd>
+            <dd className="mt-1 text-base text-zinc-900">
+              {formData.requestTitle || 'Not specified'}
+            </dd>
           </div>
           <div>
             <dt className="text-sm font-medium text-zinc-500">Region</dt>
-            <dd className="mt-1 text-base text-zinc-900">{formData.region || 'Not specified'}</dd>
+            <dd className="mt-1 text-base text-zinc-900">
+              {formData.region || 'Not specified'}
+            </dd>
           </div>
           <div>
             <dt className="text-sm font-medium text-zinc-500">Submitted By</dt>
-            <dd className="mt-1 text-base text-zinc-900">{formData.requestorEmail || 'Not specified'}</dd>
+            <dd className="mt-1 text-base text-zinc-900">
+              {formData.requestorEmail || 'Not specified'}
+            </dd>
           </div>
           <div>
             <dt className="text-sm font-medium text-zinc-500">Requestor Name</dt>
-            <dd className="mt-1 text-base text-zinc-900">{formData.requestorName || 'Not specified'}</dd>
+            <dd className="mt-1 text-base text-zinc-900">
+              {formData.requestorName || 'Not specified'}
+            </dd>
           </div>
           <div>
             <dt className="text-sm font-medium text-zinc-500">Due Date</dt>
-            <dd className="mt-1 text-base text-zinc-900">{formatDate(formData.dueDate)}</dd>
+            <dd className="mt-1 text-base text-zinc-900">
+              {formatDate(formData.dueDate)}
+            </dd>
           </div>
           <div>
             <dt className="text-sm font-medium text-zinc-500">Due Time</dt>
-            <dd className="mt-1 text-base text-zinc-900">{formatTime(formData.dueTime)}</dd>
+            <dd className="mt-1 text-base text-zinc-900">
+              {formatTime(formData.dueTime)}
+            </dd>
           </div>
         </dl>
       </Card>
@@ -103,7 +120,9 @@ export function ReviewStep() {
             {formData.requestType === 'Mockup' && (
               <div>
                 <dt className="text-sm font-medium text-zinc-500">Mockup Type</dt>
-                <dd className="mt-1 text-base text-zinc-900">{formData.mockupType || 'Not specified'}</dd>
+                <dd className="mt-1 text-base text-zinc-900">
+                  {formData.mockupType || 'Not specified'}
+                </dd>
               </div>
             )}
 
@@ -112,14 +131,20 @@ export function ReviewStep() {
               <>
                 <div>
                   <dt className="text-sm font-medium text-zinc-500">PPTX Type</dt>
-                  <dd className="mt-1 text-base text-zinc-900">{formData.pptxType || 'Not specified'}</dd>
+                  <dd className="mt-1 text-base text-zinc-900">
+                    {formData.pptxType || 'Not specified'}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-zinc-500">Number of Slides</dt>
-                  <dd className="mt-1 text-base text-zinc-900">{formData.numberOfSlides || 'Not specified'}</dd>
+                  <dd className="mt-1 text-base text-zinc-900">
+                    {formData.numberOfSlides || 'Not specified'}
+                  </dd>
                 </div>
                 <div className="md:col-span-2">
-                  <dt className="text-sm font-medium text-zinc-500">Presentation Structure</dt>
+                  <dt className="text-sm font-medium text-zinc-500">
+                    Presentation Structure
+                  </dt>
                   <dd className="mt-1 text-base text-zinc-900 whitespace-pre-wrap">
                     {formData.presentationStructure || 'Not specified'}
                   </dd>
@@ -131,12 +156,18 @@ export function ReviewStep() {
             {formData.requestType === 'Rise & Shine' && (
               <>
                 <div>
-                  <dt className="text-sm font-medium text-zinc-500">Rise & Shine Level</dt>
-                  <dd className="mt-1 text-base text-zinc-900">{formData.riseAndShineLevel || 'Not specified'}</dd>
+                  <dt className="text-sm font-medium text-zinc-500">
+                    Rise & Shine Level
+                  </dt>
+                  <dd className="mt-1 text-base text-zinc-900">
+                    {formData.riseAndShineLevel || 'Not specified'}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-zinc-500">Number of Slides</dt>
-                  <dd className="mt-1 text-base text-zinc-900">{formData.numberOfSlides || 'Not specified'}</dd>
+                  <dd className="mt-1 text-base text-zinc-900">
+                    {formData.numberOfSlides || 'Not specified'}
+                  </dd>
                 </div>
               </>
             )}
@@ -145,7 +176,9 @@ export function ReviewStep() {
             {formData.requestType === 'Proofs' && (
               <div>
                 <dt className="text-sm font-medium text-zinc-500">Proof Type</dt>
-                <dd className="mt-1 text-base text-zinc-900">{formData.proofType || 'Not specified'}</dd>
+                <dd className="mt-1 text-base text-zinc-900">
+                  {formData.proofType || 'Not specified'}
+                </dd>
               </div>
             )}
 
@@ -163,64 +196,88 @@ export function ReviewStep() {
       )}
 
       {/* Products - Only for Mockup requests */}
-      {formData.requestType === 'Mockup' && formData.products && formData.products.length > 0 && (
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-zinc-900 mb-4">
-            Products ({formData.products.length})
-          </h3>
-          <div className="space-y-4">
-            {formData.products.map((product, index) => (
-              <div key={product.id} className="border-b border-zinc-200 last:border-0 pb-4 last:pb-0">
-                <h4 className="font-medium text-zinc-900 mb-3">Product {index + 1}</h4>
-                <dl className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <dt className="font-medium text-zinc-500">Product Name</dt>
-                    <dd className="mt-1 text-zinc-900">{product.name || 'Not specified'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-zinc-500">Product Link</dt>
-                    <dd className="mt-1 text-zinc-900">
-                      {product.link ? (
-                        <a href={product.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                          {product.link}
-                        </a>
-                      ) : (
-                        'Not specified'
-                      )}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-zinc-500">Color</dt>
-                    <dd className="mt-1 text-zinc-900">{product.color || 'Not specified'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-zinc-500">Imprint Method</dt>
-                    <dd className="mt-1 text-zinc-900">{product.imprintMethod || 'Not specified'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-zinc-500">Imprint Color</dt>
-                    <dd className="mt-1 text-zinc-900">{product.imprintColor || 'Not specified'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-zinc-500">Imprint Location</dt>
-                    <dd className="mt-1 text-zinc-900">{product.location || 'Not specified'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-zinc-500">Size</dt>
-                    <dd className="mt-1 text-zinc-900">{product.size || 'Not specified'}</dd>
-                  </div>
-                  {product.notes && (
-                    <div className="md:col-span-2">
-                      <dt className="font-medium text-zinc-500">Notes</dt>
-                      <dd className="mt-1 text-zinc-900 whitespace-pre-wrap">{product.notes}</dd>
+      {formData.requestType === 'Mockup' &&
+        formData.products &&
+        formData.products.length > 0 && (
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold text-zinc-900 mb-4">
+              Products ({formData.products.length})
+            </h3>
+            <div className="space-y-4">
+              {formData.products.map((product, index) => (
+                <div
+                  key={product.id}
+                  className="border-b border-zinc-200 last:border-0 pb-4 last:pb-0"
+                >
+                  <h4 className="font-medium text-zinc-900 mb-3">Product {index + 1}</h4>
+                  <dl className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <dt className="font-medium text-zinc-500">Product Name</dt>
+                      <dd className="mt-1 text-zinc-900">
+                        {product.name || 'Not specified'}
+                      </dd>
                     </div>
-                  )}
-                </dl>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
+                    <div>
+                      <dt className="font-medium text-zinc-500">Product Link</dt>
+                      <dd className="mt-1 text-zinc-900">
+                        {product.link ? (
+                          <a
+                            href={product.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            {product.link}
+                          </a>
+                        ) : (
+                          'Not specified'
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-zinc-500">Color</dt>
+                      <dd className="mt-1 text-zinc-900">
+                        {product.color || 'Not specified'}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-zinc-500">Imprint Method</dt>
+                      <dd className="mt-1 text-zinc-900">
+                        {product.imprintMethod || 'Not specified'}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-zinc-500">Imprint Color</dt>
+                      <dd className="mt-1 text-zinc-900">
+                        {product.imprintColor || 'Not specified'}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-zinc-500">Imprint Location</dt>
+                      <dd className="mt-1 text-zinc-900">
+                        {product.location || 'Not specified'}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-zinc-500">Size</dt>
+                      <dd className="mt-1 text-zinc-900">
+                        {product.size || 'Not specified'}
+                      </dd>
+                    </div>
+                    {product.notes && (
+                      <div className="md:col-span-2">
+                        <dt className="font-medium text-zinc-500">Notes</dt>
+                        <dd className="mt-1 text-zinc-900 whitespace-pre-wrap">
+                          {product.notes}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
       {/* Project Metadata */}
       <Card className="p-6">
@@ -234,11 +291,15 @@ export function ReviewStep() {
           )}
           <div>
             <dt className="text-sm font-medium text-zinc-500">Project Value</dt>
-            <dd className="mt-1 text-base text-zinc-900">{formData.projectValue || 'Not specified'}</dd>
+            <dd className="mt-1 text-base text-zinc-900">
+              {formData.projectValue || 'Not specified'}
+            </dd>
           </div>
           <div>
             <dt className="text-sm font-medium text-zinc-500">Billable</dt>
-            <dd className="mt-1 text-base text-zinc-900">{formData.billable || 'Not specified'}</dd>
+            <dd className="mt-1 text-base text-zinc-900">
+              {formData.billable || 'Not specified'}
+            </dd>
           </div>
           {formData.clientType && (
             <div>
@@ -263,25 +324,29 @@ export function ReviewStep() {
               </dd>
             </div>
           )}
-          {formData.addCollaborators && formData.collaborators && formData.collaborators.length > 0 && (
-            <div className="md:col-span-2">
-              <dt className="text-sm font-medium text-zinc-500">Collaborators</dt>
-              <dd className="mt-1">
-                <ul className="list-disc list-inside text-base text-zinc-900">
-                  {formData.collaborators.map((email, index) => (
-                    <li key={index}>{email}</li>
-                  ))}
-                </ul>
-              </dd>
-            </div>
-          )}
+          {formData.addCollaborators &&
+            formData.collaborators &&
+            formData.collaborators.length > 0 && (
+              <div className="md:col-span-2">
+                <dt className="text-sm font-medium text-zinc-500">Collaborators</dt>
+                <dd className="mt-1">
+                  <ul className="list-disc list-inside text-base text-zinc-900">
+                    {formData.collaborators.map((email, index) => (
+                      <li key={index}>{email}</li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            )}
         </dl>
       </Card>
 
       {/* Pertinent Information */}
       {formData.pertinentInformation && (
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-zinc-900 mb-4">Pertinent Information</h3>
+          <h3 className="text-lg font-semibold text-zinc-900 mb-4">
+            Pertinent Information
+          </h3>
           <div
             className="prose prose-sm max-w-none text-zinc-900"
             dangerouslySetInnerHTML={{ __html: formData.pertinentInformation }}
@@ -293,7 +358,9 @@ export function ReviewStep() {
       {((formData.attachments && formData.attachments.length > 0) ||
         (formData.websiteLinks && formData.websiteLinks.length > 0)) && (
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-zinc-900 mb-4">Attachments & Links</h3>
+          <h3 className="text-lg font-semibold text-zinc-900 mb-4">
+            Attachments & Links
+          </h3>
 
           {/* File Attachments */}
           {formData.attachments && formData.attachments.length > 0 && (
@@ -303,9 +370,14 @@ export function ReviewStep() {
               </Label>
               <ul className="space-y-2">
                 {formData.attachments.map((file) => (
-                  <li key={file.id} className="flex items-center justify-between bg-zinc-50 px-3 py-2 rounded">
+                  <li
+                    key={file.id}
+                    className="flex items-center justify-between bg-zinc-50 px-3 py-2 rounded"
+                  >
                     <span className="text-sm text-zinc-900 truncate">{file.name}</span>
-                    <span className="text-xs text-zinc-500 ml-2">{formatFileSize(file.size)}</span>
+                    <span className="text-xs text-zinc-500 ml-2">
+                      {formatFileSize(file.size)}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -322,7 +394,9 @@ export function ReviewStep() {
                 {formData.websiteLinks.map((link) => (
                   <li key={link.id} className="bg-zinc-50 px-3 py-2 rounded">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                      <span className="text-xs font-medium text-zinc-500">{link.type}</span>
+                      <span className="text-xs font-medium text-zinc-500">
+                        {link.type}
+                      </span>
                       <a
                         href={link.url}
                         target="_blank"
@@ -344,9 +418,9 @@ export function ReviewStep() {
       <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded text-sm">
         <p className="font-medium">Phase 4 Note</p>
         <p className="mt-1">
-          Upon submission, backend integrations will create Google Drive folder, upload files,
-          create Asana task, and send Slack notification. These features will be implemented in
-          Phase 4: Backend Integrations.
+          Upon submission, backend integrations will create Google Drive folder, upload
+          files, create Asana task, and send Slack notification. These features will be
+          implemented in Phase 4: Backend Integrations.
         </p>
       </div>
     </div>

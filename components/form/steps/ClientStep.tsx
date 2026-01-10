@@ -2,7 +2,7 @@
  * Client Step
  *
  * Second step where user enters client information.
- * Features autocomplete search against cached CommonSKU clients.
+ * Features autocomplete search against cached commonsku clients.
  * Allows "Not Listed" clients to proceed without being in the database.
  */
 
@@ -189,7 +189,7 @@ export function ClientStep() {
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium text-green-800">
-              Client Found in CommonSKU
+              Client Found in commonsku
             </p>
           </div>
         </div>
@@ -204,7 +204,7 @@ export function ClientStep() {
           <div className="flex items-start gap-3 p-4 rounded-lg border bg-amber-50 border-amber-200">
             <div className="flex-1">
               <p className="text-sm text-amber-800">
-                Client not found in CommonSKU. Click next if ok to proceed.
+                Client not found in commonsku. Click next if ok to proceed.
               </p>
             </div>
           </div>

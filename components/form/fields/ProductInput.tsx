@@ -45,7 +45,7 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
         <Label htmlFor={`product-link-${product.id}`}>Product Link</Label>
         <Input
           id={`product-link-${product.id}`}
-          type="url"
+          type="text"
           value={product.link || ''}
           onChange={(e) => handleChange('link', e.target.value)}
           placeholder="https://..."
@@ -67,9 +67,7 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
 
         {/* Imprint Method */}
         <div>
-          <Label htmlFor={`product-imprint-method-${product.id}`}>
-            Imprint Method
-          </Label>
+          <Label htmlFor={`product-imprint-method-${product.id}`}>Imprint Method</Label>
           <Input
             id={`product-imprint-method-${product.id}`}
             value={product.imprintMethod || ''}
@@ -80,9 +78,7 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
 
         {/* Imprint Color */}
         <div>
-          <Label htmlFor={`product-imprint-color-${product.id}`}>
-            Imprint Color
-          </Label>
+          <Label htmlFor={`product-imprint-color-${product.id}`}>Imprint Color</Label>
           <Input
             id={`product-imprint-color-${product.id}`}
             value={product.imprintColor || ''}
@@ -93,9 +89,7 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
 
         {/* Decoration Location */}
         <div>
-          <Label htmlFor={`product-location-${product.id}`}>
-            Decoration Location
-          </Label>
+          <Label htmlFor={`product-location-${product.id}`}>Decoration Location</Label>
           <Input
             id={`product-location-${product.id}`}
             value={product.location || ''}

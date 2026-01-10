@@ -11,9 +11,52 @@ import { useAuth } from '@/lib/firebase/AuthContext';
 import { signInWithGoogle } from '@/lib/firebase/auth';
 import { Button } from '@/components/ui/button';
 import { FormContainer } from '@/components/form/FormContainer';
-import { FormData } from '@/types/form';
+import { FormData, FileAttachment } from '@/types/form';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+/**
+ * Convert a File object to base64 string
+ */
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      // Result is "data:mime/type;base64,<base64data>"
+      // We only want the base64 part after the comma
+      const result = reader.result as string;
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+}
+
+/**
+ * Process attachments to convert File objects to base64 for server transfer
+ */
+async function processAttachments(
+  attachments: FileAttachment[]
+): Promise<FileAttachment[]> {
+  const processedAttachments: FileAttachment[] = [];
+
+  for (const attachment of attachments) {
+    if (attachment.file) {
+      const base64Data = await fileToBase64(attachment.file);
+      processedAttachments.push({
+        id: attachment.id,
+        name: attachment.name,
+        size: attachment.size,
+        mimeType: attachment.mimeType,
+        base64Data, // Include base64 data instead of File object
+        // Don't include file, localUrl as they're not serializable or needed server-side
+      });
+    }
+  }
+
+  return processedAttachments;
+}
 
 export default function RequestPage() {
   const { user, loading } = useAuth();
@@ -83,13 +126,24 @@ export default function RequestPage() {
   // Handle form submission
   const handleSubmit = async (formData: FormData) => {
     try {
+      // Process attachments to convert File objects to base64
+      const processedAttachments = formData.attachments
+        ? await processAttachments(formData.attachments)
+        : [];
+
+      // Create submission data with processed attachments
+      const submissionData = {
+        ...formData,
+        attachments: processedAttachments,
+      };
+
       // Call submission API
       const response = await fetch('/api/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submissionData),
       });
 
       const result = await response.json();

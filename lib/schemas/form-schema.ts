@@ -77,7 +77,8 @@ export const fileAttachmentSchema = z.object({
   name: z.string(),
   size: z.number(),
   mimeType: z.string(),
-  file: z.any().optional(), // File object
+  file: z.any().optional(), // File object (client-side only)
+  base64Data: z.string().optional(), // Base64 encoded file data for server transfer
   driveFileId: z.string().optional(),
   driveUrl: z.string().optional(),
   localUrl: z.string().optional(),

@@ -264,12 +264,12 @@ export function buildAsanaDescription(formData: FormData): string {
     );
   }
 
-  // Pertinent Information - strip any potentially problematic HTML
+  // Pertinent Information - convert TipTap HTML to Asana-compatible HTML
   if (formData.pertinentInformation) {
     sections.push('\n<strong>PERTINENT INFORMATION</strong>\n');
-    // Strip HTML tags from TipTap content and just use plain text
-    const plainText = stripHtml(formData.pertinentInformation);
-    sections.push(`${escapeXml(plainText).replace(/\n/g, '\n')}\n`);
+    // Convert TipTap HTML to Asana-compatible format (preserves lists, bold, italic, links)
+    const asanaHtml = convertHtmlForAsana(formData.pertinentInformation);
+    sections.push(`${asanaHtml}\n`);
   }
 
   // Website Links
@@ -369,6 +369,41 @@ export function stripHtml(html: string): string {
     .replace(/<\/p>/gi, '\n\n')
     .replace(/<[^>]+>/g, '')
     .trim();
+}
+
+/**
+ * Convert TipTap HTML to Asana-compatible HTML
+ * Preserves lists (ul, ol, li), bold, italic, links
+ * Converts paragraphs and line breaks appropriately
+ */
+export function convertHtmlForAsana(html: string): string {
+  if (!html) return '';
+
+  // First, escape any raw text that's not in tags (to handle special chars)
+  // But we need to preserve the HTML structure
+
+  // Convert <p> tags to newlines (Asana doesn't use <p>)
+  let result = html
+    .replace(/<p><\/p>/gi, '\n') // Empty paragraphs to newline
+    .replace(/<p>/gi, '') // Remove opening <p>
+    .replace(/<\/p>/gi, '\n'); // Closing </p> to newline
+
+  // Convert <br> tags to newlines
+  result = result.replace(/<br\s*\/?>/gi, '\n');
+
+  // Keep supported Asana tags: strong, em, u, s, code, ul, ol, li, a
+  // TipTap uses <strong> for bold (already correct)
+  // TipTap uses <em> for italic (already correct)
+
+  // Remove any unsupported tags but keep their content
+  // Asana supports: strong, em, u, s, code, ol, ul, li, a
+  // We need to strip things like <div>, <span>, etc.
+  result = result.replace(/<\/?(?!(?:strong|em|u|s|code|ol|ul|li|a)\b)[a-z][^>]*>/gi, '');
+
+  // Clean up multiple newlines
+  result = result.replace(/\n{3,}/g, '\n\n');
+
+  return result.trim();
 }
 
 // Legacy exports for backwards compatibility (no longer used)

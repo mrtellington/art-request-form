@@ -149,37 +149,11 @@ export function RequestDetailsStep() {
 
       case 'Proofs':
         return (
-          <div>
-            <Label htmlFor="proofType">
-              Proof Type <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={watch('proofType') || undefined}
-              onValueChange={(value) =>
-                setValue('proofType', value, {
-                  shouldValidate: true,
-                })
-              }
-            >
-              <SelectTrigger id="proofType">
-                <SelectValue placeholder="Select proof type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Whitestone Letterhead">
-                  Whitestone Letterhead
-                </SelectItem>
-                <SelectItem value="Tech Pack (List Specs in Pertinent Information)">
-                  Tech Pack (List Specs in Pertinent Information)
-                </SelectItem>
-                <SelectItem value="Supplier Template">Supplier Template</SelectItem>
-                <SelectItem value="No Template (Use for Printed Materials)">
-                  No Template (Use for Printed Materials)
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.proofType && (
-              <p className="text-sm text-red-600 mt-2">{errors.proofType.message}</p>
-            )}
+          <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded">
+            <p className="text-sm">
+              You will select the Proof Type in the Project Info step. Continue to the
+              next step.
+            </p>
           </div>
         );
 
