@@ -225,7 +225,7 @@ export function ClientStep() {
             >
               {clientExists
                 ? `This client exists in CommonSKU. Files will be organized under their client folder.`
-                : `"${clientName}" is not in CommonSKU. Files will be organized in the "Not Listed" folder, and this name will be used in Asana.`}
+                : `"${clientName}" is not in CommonSKU. A new folder will be created and this name will be used in Asana.`}
             </p>
             {clientExists && (
               <p className="text-xs text-green-600 mt-2 font-mono">
