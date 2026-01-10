@@ -15,7 +15,9 @@ export function formatProducts(products: Product[]): string {
 
   return products
     .map((product, index) => {
-      const lines: string[] = [`**Product ${index + 1}: ${product.name || 'Unnamed Product'}**`];
+      const lines: string[] = [
+        `**Product ${index + 1}: ${product.name || 'Unnamed Product'}**`,
+      ];
 
       if (product.link) lines.push(`• Link: ${product.link}`);
       if (product.color) lines.push(`• Color: ${product.color}`);
@@ -51,10 +53,14 @@ export function buildAsanaDescription(formData: FormData): string {
   sections.push(`**Client:** ${formData.clientName || 'Not specified'}`);
   sections.push(`**Request Title:** ${formData.requestTitle || 'Not specified'}`);
   sections.push(`**Region:** ${formData.region || 'Not specified'}`);
-  sections.push(`**Submitted By:** ${formData.requestorName || 'Unknown'} (${formData.requestorEmail || 'no-email'})`);
+  sections.push(
+    `**Submitted By:** ${formData.requestorName || 'Unknown'} (${formData.requestorEmail || 'no-email'})`
+  );
 
   if (formData.dueDate) {
-    sections.push(`**Due Date:** ${formData.dueDate}${formData.dueTime ? ` at ${formData.dueTime}` : ''}`);
+    sections.push(
+      `**Due Date:** ${formData.dueDate}${formData.dueTime ? ` at ${formData.dueTime}` : ''}`
+    );
   }
 
   // Request-specific details
@@ -67,14 +73,17 @@ export function buildAsanaDescription(formData: FormData): string {
         break;
       case 'PPTX':
         if (formData.pptxType) sections.push(`**PPTX Type:** ${formData.pptxType}`);
-        if (formData.numberOfSlides) sections.push(`**Number of Slides:** ${formData.numberOfSlides}`);
+        if (formData.numberOfSlides)
+          sections.push(`**Number of Slides:** ${formData.numberOfSlides}`);
         if (formData.presentationStructure) {
           sections.push(`**Presentation Structure:**\n${formData.presentationStructure}`);
         }
         break;
       case 'Rise & Shine':
-        if (formData.riseAndShineLevel) sections.push(`**Level:** ${formData.riseAndShineLevel}`);
-        if (formData.numberOfSlides) sections.push(`**Number of Slides:** ${formData.numberOfSlides}`);
+        if (formData.riseAndShineLevel)
+          sections.push(`**Level:** ${formData.riseAndShineLevel}`);
+        if (formData.numberOfSlides)
+          sections.push(`**Number of Slides:** ${formData.numberOfSlides}`);
         break;
       case 'Proofs':
         if (formData.proofType) sections.push(`**Proof Type:** ${formData.proofType}`);
@@ -88,14 +97,19 @@ export function buildAsanaDescription(formData: FormData): string {
   }
 
   // Products (for Mockup requests)
-  if (formData.requestType === 'Mockup' && formData.products && formData.products.length > 0) {
+  if (
+    formData.requestType === 'Mockup' &&
+    formData.products &&
+    formData.products.length > 0
+  ) {
     sections.push('\n## Products');
     sections.push(formatProducts(formData.products));
   }
 
   // Project Metadata
   sections.push('\n## Project Information');
-  if (formData.projectNumber) sections.push(`**Project Number:** ${formData.projectNumber}`);
+  if (formData.projectNumber)
+    sections.push(`**Project Number:** ${formData.projectNumber}`);
   sections.push(`**Project Value:** ${formData.projectValue || 'Not specified'}`);
   sections.push(`**Billable:** ${formData.billable || 'Not specified'}`);
   if (formData.clientType) sections.push(`**Client Type:** ${formData.clientType}`);
@@ -104,7 +118,11 @@ export function buildAsanaDescription(formData: FormData): string {
     sections.push(`**Labels:** ${formData.labels.join(', ')}`);
   }
 
-  if (formData.addCollaborators && formData.collaborators && formData.collaborators.length > 0) {
+  if (
+    formData.addCollaborators &&
+    formData.collaborators &&
+    formData.collaborators.length > 0
+  ) {
     sections.push(`**Collaborators:** ${formData.collaborators.join(', ')}`);
   }
 
@@ -174,24 +192,27 @@ export function formatCustomFields(formData: FormData): Record<string, string | 
 }
 
 /**
- * Get parent folder ID for Google Drive based on client name
- * A-L clients go to one folder, M-Z to another
+ * Get parent folder ID for Google Drive based on first letter of client name
+ * - A-L clients go to A-L folder
+ * - M-Z clients go to M-Z folder
+ * - Numbers/special chars default to A-L folder
+ * Note: This applies regardless of whether client exists in CommonSKU
  */
 export function getParentFolderForClient(clientName: string): string {
   if (!clientName) {
-    // Default to "Not Listed" folder
-    return process.env.GOOGLE_DRIVE_NOT_LISTED_FOLDER_ID || '';
+    // Default to A-L folder if no name
+    return process.env.GOOGLE_DRIVE_AL_SHARED_DRIVE_ID || '';
   }
 
   const firstLetter = clientName.charAt(0).toUpperCase();
 
   if (firstLetter >= 'A' && firstLetter <= 'L') {
-    return process.env.GOOGLE_DRIVE_AL_FOLDER_ID || '';
+    return process.env.GOOGLE_DRIVE_AL_SHARED_DRIVE_ID || '';
   } else if (firstLetter >= 'M' && firstLetter <= 'Z') {
-    return process.env.GOOGLE_DRIVE_MZ_FOLDER_ID || '';
+    return process.env.GOOGLE_DRIVE_MZ_SHARED_DRIVE_ID || '';
   } else {
-    // Numbers or special characters go to "Not Listed"
-    return process.env.GOOGLE_DRIVE_NOT_LISTED_FOLDER_ID || '';
+    // Numbers or special characters default to A-L folder
+    return process.env.GOOGLE_DRIVE_AL_SHARED_DRIVE_ID || '';
   }
 }
 
@@ -212,9 +233,7 @@ export function generateFolderName(formData: FormData): string {
  */
 export function sanitizeFilename(filename: string): string {
   // Remove invalid characters and limit length
-  return filename
-    .replace(/[<>:"/\\|?*\x00-\x1F]/g, '_')
-    .substring(0, 255);
+  return filename.replace(/[<>:"/\\|?*\x00-\x1F]/g, '_').substring(0, 255);
 }
 
 /**
