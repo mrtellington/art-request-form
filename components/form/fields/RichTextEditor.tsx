@@ -36,13 +36,13 @@ export function RichTextEditor({
       }),
     ],
     content: value || '',
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
     editorProps: {
       attributes: {
-        class:
-          'prose prose-sm max-w-none min-h-[200px] p-4 focus:outline-none',
+        class: 'prose prose-sm max-w-none min-h-[200px] p-4 focus:outline-none',
       },
     },
   });

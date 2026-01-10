@@ -44,9 +44,7 @@ export function RequestDetailsStep() {
               placeholder="e.g., Product Mockup, Scene Mockup"
             />
             {errors.mockupType && (
-              <p className="text-sm text-red-600 mt-2">
-                {errors.mockupType.message}
-              </p>
+              <p className="text-sm text-red-600 mt-2">{errors.mockupType.message}</p>
             )}
           </div>
         );
@@ -64,9 +62,7 @@ export function RequestDetailsStep() {
                 placeholder="e.g., Sales Presentation, Pitch Deck"
               />
               {errors.pptxType && (
-                <p className="text-sm text-red-600 mt-2">
-                  {errors.pptxType.message}
-                </p>
+                <p className="text-sm text-red-600 mt-2">{errors.pptxType.message}</p>
               )}
             </div>
 
@@ -89,9 +85,7 @@ export function RequestDetailsStep() {
             </div>
 
             <div>
-              <Label htmlFor="presentationStructure">
-                Presentation Structure
-              </Label>
+              <Label htmlFor="presentationStructure">Presentation Structure</Label>
               <Textarea
                 id="presentationStructure"
                 {...register('presentationStructure')}
@@ -159,15 +153,32 @@ export function RequestDetailsStep() {
             <Label htmlFor="proofType">
               Proof Type <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="proofType"
-              {...register('proofType')}
-              placeholder="e.g., Digital Proof, Physical Proof"
-            />
+            <Select
+              value={watch('proofType') || undefined}
+              onValueChange={(value) =>
+                setValue('proofType', value, {
+                  shouldValidate: true,
+                })
+              }
+            >
+              <SelectTrigger id="proofType">
+                <SelectValue placeholder="Select proof type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Whitestone Letterhead">
+                  Whitestone Letterhead
+                </SelectItem>
+                <SelectItem value="Tech Pack (List Specs in Pertinent Information)">
+                  Tech Pack (List Specs in Pertinent Information)
+                </SelectItem>
+                <SelectItem value="Supplier Template">Supplier Template</SelectItem>
+                <SelectItem value="No Template (Use for Printed Materials)">
+                  No Template (Use for Printed Materials)
+                </SelectItem>
+              </SelectContent>
+            </Select>
             {errors.proofType && (
-              <p className="text-sm text-red-600 mt-2">
-                {errors.proofType.message}
-              </p>
+              <p className="text-sm text-red-600 mt-2">{errors.proofType.message}</p>
             )}
           </div>
         );
@@ -196,8 +207,8 @@ export function RequestDetailsStep() {
         return (
           <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded">
             <p className="text-sm">
-              No additional details required for Creative Design Services. Continue
-              to the next step.
+              No additional details required for Creative Design Services. Continue to the
+              next step.
             </p>
           </div>
         );
@@ -207,9 +218,5 @@ export function RequestDetailsStep() {
     }
   };
 
-  return (
-    <div className="space-y-6">
-      {renderConditionalFields()}
-    </div>
-  );
+  return <div className="space-y-6">{renderConditionalFields()}</div>;
 }

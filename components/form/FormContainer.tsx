@@ -205,7 +205,7 @@ export function FormContainer({
             onPrevious={handlePrevious}
             onNext={handleNext}
             canGoPrevious={canGoPrev}
-            canGoNext={canGoNext}
+            canGoNext={canGoNext || isLastStep}
             isFirstStep={isFirstStep}
             isLastStep={isLastStep}
             isSubmitting={isSubmitting}

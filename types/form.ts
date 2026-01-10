@@ -6,45 +6,45 @@
  */
 
 export type RequestType =
-  | "Creative Design Services"
-  | "Mockup"
-  | "PPTX"
-  | "Proofs"
-  | "Sneak Peek"
-  | "Rise & Shine";
+  | 'Creative Design Services'
+  | 'Mockup'
+  | 'PPTX'
+  | 'Proofs'
+  | 'Sneak Peek'
+  | 'Rise & Shine';
 
-export type Region = "US" | "CAD" | "EU" | "UK" | "APAC";
+export type Region = 'US' | 'CAD' | 'EU' | 'UK' | 'APAC';
 
-export type ProjectValue = "<$50k" | "$50k-$250k" | ">$250k";
+export type ProjectValue = '<$50k' | '$50k-$250k' | '>$250k';
 
-export type Billable = "Yes" | "No";
+export type Billable = 'Yes' | 'No';
 
-export type RiseAndShineLevel = "Bronze" | "Silver" | "Gold";
+export type RiseAndShineLevel = 'Bronze' | 'Silver' | 'Gold';
 
-export type Label = "Call Needed" | "Rush" | "Needs Creative";
+export type Label = 'Call Needed' | 'Rush' | 'Needs Creative';
 
 /**
  * Product interface - uses object structure instead of parallel arrays
  * This solves the Cognito Forms data misalignment problem
  */
 export interface Product {
-  id: string;                    // UUID for React keys
+  id: string; // UUID for React keys
   name: string;
   color?: string;
   imprintMethod?: string;
   imprintColor?: string;
-  location?: string;              // Decoration location
-  size?: string;                  // Decoration size
-  link?: string;                  // Product URL
-  notes?: string;                 // Other info - STAYS WITH PRODUCT
+  location?: string; // Decoration location
+  size?: string; // Decoration size
+  link?: string; // Product URL
+  notes?: string; // Other info - STAYS WITH PRODUCT
 }
 
 /**
  * Website/Social Media Link interface
  */
 export interface WebsiteLink {
-  id: string;                    // UUID for React keys
-  type: string;                  // "Instagram", "Website", "Pinterest", etc.
+  id: string; // UUID for React keys
+  type: string; // "Instagram", "Website", "Pinterest", etc.
   url: string;
 }
 
@@ -56,10 +56,10 @@ export interface FileAttachment {
   name: string;
   size: number;
   mimeType: string;
-  file?: File;                   // During upload
-  driveFileId?: string;          // After upload to Google Drive
+  file?: File; // During upload
+  driveFileId?: string; // After upload to Google Drive
   driveUrl?: string;
-  localUrl?: string;             // Blob URL for preview
+  localUrl?: string; // Blob URL for preview
 }
 
 /**
@@ -69,7 +69,7 @@ export interface FileAttachment {
 export interface FormData {
   // Basic Information
   requestType: RequestType | null;
-  requestorName: string | null;  // First + Last name combined
+  requestorName: string | null; // First + Last name combined
   requestorEmail: string | null;
   region: Region | null;
   requestTitle: string | null;
@@ -77,11 +77,11 @@ export interface FormData {
   // Client Information
   clientName: string | null;
   clientExists: boolean;
-  clientId?: string;              // CommonSKU client ID if exists
+  clientId?: string; // CommonSKU client ID if exists
 
   // Due Date/Time
-  dueDate: string | null;         // ISO 8601 date
-  dueTime?: string;               // Time in format "HH:mm" (Eastern)
+  dueDate: string | null; // ISO 8601 date
+  dueTime?: string; // Time in format "HH:mm" (Eastern)
 
   // Project Metadata
   projectNumber?: string;
@@ -91,13 +91,13 @@ export interface FormData {
 
   // Collaborators
   addCollaborators: boolean;
-  collaborators: string[];        // Email addresses
+  collaborators: string[]; // Email addresses
 
   // Labels
   labels: Label[];
 
   // Pertinent Information (Rich Text)
-  pertinentInformation?: string;  // HTML from TipTap editor
+  pertinentInformation?: string; // HTML from TipTap editor
 
   // Conditional Fields (based on requestType)
   mockupType?: string;
@@ -121,11 +121,12 @@ export const initialFormData: FormData = {
   requestType: null,
   requestorName: null,
   requestorEmail: null,
-  region: null,
+  region: 'US',
   requestTitle: null,
   clientName: null,
   clientExists: false,
   dueDate: null,
+  dueTime: '18:00',
   projectValue: null,
   billable: null,
   clientType: null,
@@ -134,5 +135,5 @@ export const initialFormData: FormData = {
   labels: [],
   products: [],
   websiteLinks: [],
-  attachments: []
+  attachments: [],
 };

@@ -13,7 +13,7 @@ import { useFormContext } from 'react-hook-form';
 import { FormData } from '@/types/form';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { CheckCircle, XCircle, Loader2, AlertCircle, Search } from 'lucide-react';
+import { CheckCircle, Loader2, Search } from 'lucide-react';
 
 interface ClientResult {
   id: string;
@@ -107,14 +107,7 @@ export function ClientStep() {
     setValue('clientExists', true);
     setValue('clientId', client.id);
     setShowDropdown(false);
-    setSearchResults([]);
-  };
-
-  // Handle "Use as Not Listed" button click
-  const handleUseAsNotListed = () => {
-    setValue('clientExists', false);
-    setValue('clientId', undefined);
-    setShowDropdown(false);
+    setSearchResults([]); // Clear results after selection
   };
 
   // Get the registration props but exclude ref since we need our own
@@ -128,8 +121,7 @@ export function ClientStep() {
           Client Name <span className="text-red-500">*</span>
         </Label>
         <p className="text-sm text-zinc-600 mt-1 mb-3">
-          Start typing to search for a client. If not found, you can proceed with the name
-          as &quot;Not Listed&quot;.
+          Start typing to search for a client.
         </p>
 
         <div className="relative" ref={dropdownRef}>
@@ -151,7 +143,7 @@ export function ClientStep() {
                     : ''
               }`}
               onFocus={() => {
-                if (searchResults.length > 0) {
+                if (searchResults.length > 0 && !clientExists) {
                   setShowDropdown(true);
                 }
               }}
@@ -161,20 +153,14 @@ export function ClientStep() {
             {/* Status Icon */}
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
               {isSearching && <Loader2 className="w-5 h-5 text-zinc-400 animate-spin" />}
-              {!isSearching && clientName && clientName.length >= 2 && (
-                <>
-                  {clientExists ? (
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                  ) : (
-                    <XCircle className="w-5 h-5 text-amber-600" />
-                  )}
-                </>
+              {!isSearching && clientExists && (
+                <CheckCircle className="w-5 h-5 text-green-600" />
               )}
             </div>
           </div>
 
-          {/* Autocomplete Dropdown */}
-          {showDropdown && searchResults.length > 0 && (
+          {/* Autocomplete Dropdown - only show when not already selected */}
+          {showDropdown && searchResults.length > 0 && !clientExists && (
             <div className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 rounded-lg shadow-lg max-h-60 overflow-auto">
               {searchResults.map((client) => (
                 <button
@@ -184,7 +170,6 @@ export function ClientStep() {
                   className="w-full px-4 py-3 text-left hover:bg-zinc-50 focus:bg-zinc-50 focus:outline-none border-b border-zinc-100 last:border-b-0 transition-colors"
                 >
                   <span className="font-medium text-zinc-900">{client.name}</span>
-                  <span className="ml-2 text-xs text-zinc-500">ID: {client.id}</span>
                 </button>
               ))}
             </div>
@@ -196,64 +181,33 @@ export function ClientStep() {
         )}
       </div>
 
-      {/* Validation Result Message */}
-      {!isSearching && clientName && clientName.length >= 2 && (
-        <div
-          className={`flex items-start gap-3 p-4 rounded-lg border ${
-            clientExists ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'
-          }`}
-        >
+      {/* Only show confirmation when client is found */}
+      {!isSearching && clientExists && clientName && clientName.length >= 2 && (
+        <div className="flex items-start gap-3 p-4 rounded-lg border bg-green-50 border-green-200">
           <div className="flex-shrink-0 mt-0.5">
-            {clientExists ? (
-              <CheckCircle className="w-5 h-5 text-green-600" />
-            ) : (
-              <AlertCircle className="w-5 h-5 text-amber-600" />
-            )}
+            <CheckCircle className="w-5 h-5 text-green-600" />
           </div>
           <div className="flex-1">
-            <p
-              className={`text-sm font-medium ${
-                clientExists ? 'text-green-800' : 'text-amber-800'
-              }`}
-            >
-              {clientExists ? 'Client Found in CommonSKU' : 'Client Not Listed'}
+            <p className="text-sm font-medium text-green-800">
+              Client Found in CommonSKU
             </p>
-            <p
-              className={`text-sm mt-1 ${
-                clientExists ? 'text-green-700' : 'text-amber-700'
-              }`}
-            >
-              {clientExists
-                ? `This client exists in CommonSKU. Files will be organized under their client folder.`
-                : `"${clientName}" is not in CommonSKU. A new folder will be created and this name will be used in Asana.`}
-            </p>
-            {clientExists && (
-              <p className="text-xs text-green-600 mt-2 font-mono">
-                Client ID: {watch('clientId')}
-              </p>
-            )}
-            {!clientExists && searchResults.length > 0 && (
-              <p className="text-xs text-amber-600 mt-2">
-                Did you mean one of the suggestions above? Click to select.
-              </p>
-            )}
           </div>
         </div>
       )}
 
-      {/* Not Listed Confirmation (shown when there are search results but user hasn't selected) */}
+      {/* Show not found message only when user has typed something and no match */}
       {!isSearching &&
+        !clientExists &&
         clientName &&
         clientName.length >= 2 &&
-        !clientExists &&
-        searchResults.length > 0 && (
-          <button
-            type="button"
-            onClick={handleUseAsNotListed}
-            className="w-full py-2 px-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors"
-          >
-            Use &quot;{clientName}&quot; as Not Listed Client
-          </button>
+        searchResults.length === 0 && (
+          <div className="flex items-start gap-3 p-4 rounded-lg border bg-amber-50 border-amber-200">
+            <div className="flex-1">
+              <p className="text-sm text-amber-800">
+                Client not found in CommonSKU. Click next if ok to proceed.
+              </p>
+            </div>
+          </div>
         )}
 
       {/* Hidden fields for form state */}
