@@ -21,7 +21,7 @@ function getAsanaHeaders(): HeadersInit {
   }
 
   return {
-    'Authorization': `Bearer ${token}`,
+    Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
   };
 }
@@ -41,22 +41,25 @@ export async function createAsanaTask(
       throw new Error('ASANA_PROJECT_ID environment variable not set');
     }
 
-    // Build task description
+    // Build task description (HTML format for rich text)
     let description = buildAsanaDescription(formData);
 
     // Add Google Drive link to description if available
     if (googleDriveFolderUrl) {
-      description += `\n\n## Files\n[View Files in Google Drive](${googleDriveFolderUrl})`;
+      description += `\n<strong>FILES</strong>\n<a href="${googleDriveFolderUrl}">View Files in Google Drive</a>`;
     }
 
-    // Build custom fields
-    const customFields = formatCustomFields(formData);
+    // Build custom fields (now with actual GIDs)
+    const customFields = formatCustomFields(formData, googleDriveFolderUrl);
 
-    // Prepare task data
+    // Prepare task data with HTML notes for rich text
+    // Wrap description in <body> tags as required by Asana
+    const htmlNotes = `<body>${description}</body>`;
+
     const taskData = {
       data: {
         name: formData.requestTitle || 'Untitled Art Request',
-        notes: description,
+        html_notes: htmlNotes,
         projects: [projectId],
         due_on: formData.dueDate || undefined,
         custom_fields: customFields,
@@ -72,7 +75,9 @@ export async function createAsanaTask(
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Asana API error: ${errorData.errors?.[0]?.message || response.statusText}`);
+      throw new Error(
+        `Asana API error: ${errorData.errors?.[0]?.message || response.statusText}`
+      );
     }
 
     const result = await response.json();
@@ -82,17 +87,16 @@ export async function createAsanaTask(
     return { taskId, taskUrl };
   } catch (error) {
     console.error('Error creating Asana task:', error);
-    throw new Error(`Failed to create Asana task: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to create Asana task: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
 /**
  * Add a comment to an existing Asana task
  */
-export async function addCommentToTask(
-  taskId: string,
-  comment: string
-): Promise<void> {
+export async function addCommentToTask(taskId: string, comment: string): Promise<void> {
   try {
     const response = await fetch(`${ASANA_API_URL}/tasks/${taskId}/stories`, {
       method: 'POST',
@@ -106,7 +110,9 @@ export async function addCommentToTask(
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Asana API error: ${errorData.errors?.[0]?.message || response.statusText}`);
+      throw new Error(
+        `Asana API error: ${errorData.errors?.[0]?.message || response.statusText}`
+      );
     }
   } catch (error) {
     console.error('Error adding comment to Asana task:', error);
@@ -138,7 +144,9 @@ export async function attachUrlToTask(
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Asana API error: ${errorData.errors?.[0]?.message || response.statusText}`);
+      throw new Error(
+        `Asana API error: ${errorData.errors?.[0]?.message || response.statusText}`
+      );
     }
   } catch (error) {
     console.error('Error attaching URL to Asana task:', error);
@@ -183,7 +191,11 @@ export async function handleAsanaIntegration(
   const { taskId, taskUrl } = await createAsanaTask(formData, googleDriveFolderUrl);
 
   // Add followers/collaborators
-  if (formData.addCollaborators && formData.collaborators && formData.collaborators.length > 0) {
+  if (
+    formData.addCollaborators &&
+    formData.collaborators &&
+    formData.collaborators.length > 0
+  ) {
     await addFollowersToTask(taskId, formData.collaborators);
   }
 

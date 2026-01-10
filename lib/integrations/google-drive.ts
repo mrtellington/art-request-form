@@ -2,15 +2,19 @@
  * Google Drive Integration
  *
  * Creates folders and uploads files to Google Drive using service account.
- * Implements A-L/M-Z folder routing based on client name.
+ * Implements full folder hierarchy:
+ * Root (A-L or M-Z) > First Letter > Client Name > Year > Request Title > Subfolders
  */
 
-import { google } from 'googleapis';
+import { google, drive_v3 } from 'googleapis';
 import { FormData, FileAttachment } from '@/types/form';
-import { getParentFolderForClient, generateFolderName, sanitizeFilename } from '@/lib/utils/formatters';
+import { sanitizeFilename } from '@/lib/utils/formatters';
+
+// Subfolder names for each request
+const REQUEST_SUBFOLDERS = ['Blanks', 'Edits', 'Proof', 'Attachments'];
 
 // Initialize Google Drive API client
-function getDriveClient() {
+function getDriveClient(): drive_v3.Drive {
   const credentials = process.env.GOOGLE_DRIVE_CREDENTIALS;
 
   if (!credentials) {
@@ -19,52 +23,179 @@ function getDriveClient() {
 
   const auth = new google.auth.GoogleAuth({
     credentials: JSON.parse(credentials),
-    scopes: ['https://www.googleapis.com/auth/drive.file'],
+    scopes: ['https://www.googleapis.com/auth/drive'],
   });
 
   return google.drive({ version: 'v3', auth });
 }
 
 /**
- * Create a Google Drive folder for the art request
- * Returns folder ID and URL
+ * Get the root shared drive ID based on client name (A-L or M-Z)
  */
-export async function createGoogleDriveFolder(
-  formData: FormData
-): Promise<{ folderId: string; folderUrl: string }> {
+function getRootFolderId(clientName: string): string {
+  if (!clientName) {
+    return process.env.GOOGLE_DRIVE_AL_SHARED_DRIVE_ID || '';
+  }
+
+  const firstLetter = clientName.charAt(0).toUpperCase();
+
+  if (firstLetter >= 'A' && firstLetter <= 'L') {
+    return process.env.GOOGLE_DRIVE_AL_SHARED_DRIVE_ID || '';
+  } else if (firstLetter >= 'M' && firstLetter <= 'Z') {
+    return process.env.GOOGLE_DRIVE_MZ_SHARED_DRIVE_ID || '';
+  } else {
+    // Numbers or special characters default to A-L folder
+    return process.env.GOOGLE_DRIVE_AL_SHARED_DRIVE_ID || '';
+  }
+}
+
+/**
+ * Find a folder by name within a parent folder
+ * Returns folder ID if found, null otherwise
+ */
+async function findFolderByName(
+  drive: drive_v3.Drive,
+  parentId: string,
+  folderName: string
+): Promise<string | null> {
   try {
-    const drive = getDriveClient();
-    const folderName = generateFolderName(formData);
-    const parentFolderId = getParentFolderForClient(formData.clientName || '');
-
-    if (!parentFolderId) {
-      throw new Error('Parent folder ID not configured for client');
-    }
-
-    // Create folder
-    const folderMetadata = {
-      name: folderName,
-      mimeType: 'application/vnd.google-apps.folder',
-      parents: [parentFolderId],
-    };
-
-    const folder = await drive.files.create({
-      requestBody: folderMetadata,
-      fields: 'id, webViewLink',
+    const response = await drive.files.list({
+      q: `name = '${folderName.replace(/'/g, "\\'")}' and '${parentId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+      fields: 'files(id, name)',
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
     });
 
-    const folderId = folder.data.id;
-    const folderUrl = folder.data.webViewLink;
-
-    if (!folderId || !folderUrl) {
-      throw new Error('Failed to create Google Drive folder');
+    const files = response.data.files;
+    if (files && files.length > 0) {
+      return files[0].id || null;
     }
-
-    return { folderId, folderUrl };
+    return null;
   } catch (error) {
-    console.error('Error creating Google Drive folder:', error);
-    throw new Error(`Failed to create Google Drive folder: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error(`Error finding folder "${folderName}":`, error);
+    return null;
   }
+}
+
+/**
+ * Create a folder in the specified parent
+ * Returns the created folder's ID
+ */
+async function createFolder(
+  drive: drive_v3.Drive,
+  parentId: string,
+  folderName: string
+): Promise<string> {
+  const folderMetadata = {
+    name: folderName,
+    mimeType: 'application/vnd.google-apps.folder',
+    parents: [parentId],
+  };
+
+  const folder = await drive.files.create({
+    requestBody: folderMetadata,
+    fields: 'id',
+    supportsAllDrives: true,
+  });
+
+  if (!folder.data.id) {
+    throw new Error(`Failed to create folder: ${folderName}`);
+  }
+
+  return folder.data.id;
+}
+
+/**
+ * Find or create a folder by name within a parent
+ * Returns the folder ID (existing or newly created)
+ */
+async function findOrCreateFolder(
+  drive: drive_v3.Drive,
+  parentId: string,
+  folderName: string
+): Promise<string> {
+  // First try to find existing folder
+  const existingId = await findFolderByName(drive, parentId, folderName);
+  if (existingId) {
+    console.log(`Found existing folder: ${folderName}`);
+    return existingId;
+  }
+
+  // Create new folder if not found
+  console.log(`Creating new folder: ${folderName}`);
+  return await createFolder(drive, parentId, folderName);
+}
+
+/**
+ * Build the complete folder path and create subfolders
+ * Path: Root > First Letter > Client Name > Year > Request Title > Subfolders
+ *
+ * Returns the main request folder ID and URL, plus the Attachments subfolder ID
+ */
+export async function createGoogleDriveFolderStructure(formData: FormData): Promise<{
+  folderId: string;
+  folderUrl: string;
+  attachmentsFolderId: string;
+}> {
+  const drive = getDriveClient();
+  const clientName = formData.clientName || 'Unknown Client';
+  const requestTitle = formData.requestTitle || 'Untitled Request';
+  const year = new Date().getFullYear().toString();
+  const firstLetter = clientName.charAt(0).toUpperCase();
+
+  // Get root shared drive ID
+  const rootId = getRootFolderId(clientName);
+  if (!rootId) {
+    throw new Error('Root folder ID not configured');
+  }
+
+  console.log(
+    `Building folder path: ${firstLetter} > ${clientName} > ${year} > ${requestTitle}`
+  );
+
+  // Navigate/create folder path
+  // Step 1: Find or create first letter folder (e.g., "S")
+  const letterFolderId = await findOrCreateFolder(drive, rootId, firstLetter);
+
+  // Step 2: Find or create client folder (e.g., "Spotify")
+  const clientFolderId = await findOrCreateFolder(drive, letterFolderId, clientName);
+
+  // Step 3: Find or create year folder (e.g., "2026")
+  const yearFolderId = await findOrCreateFolder(drive, clientFolderId, year);
+
+  // Step 4: Create request folder (always create new - include date for uniqueness)
+  const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const requestFolderName = `${date} - ${requestTitle}`;
+  const requestFolderId = await createFolder(drive, yearFolderId, requestFolderName);
+
+  // Step 5: Create subfolders (Blanks, Edits, Proof, Attachments)
+  let attachmentsFolderId = '';
+  for (const subfolderName of REQUEST_SUBFOLDERS) {
+    const subfolderId = await createFolder(drive, requestFolderId, subfolderName);
+    if (subfolderName === 'Attachments') {
+      attachmentsFolderId = subfolderId;
+    }
+  }
+
+  // Get the folder URL
+  const folderResponse = await drive.files.get({
+    fileId: requestFolderId,
+    fields: 'webViewLink',
+    supportsAllDrives: true,
+  });
+
+  const folderUrl = folderResponse.data.webViewLink;
+  if (!folderUrl) {
+    throw new Error('Failed to get folder URL');
+  }
+
+  console.log(`Created folder structure: ${folderUrl}`);
+
+  return {
+    folderId: requestFolderId,
+    folderUrl,
+    attachmentsFolderId,
+  };
 }
 
 /**
@@ -102,6 +233,7 @@ export async function uploadFileToDrive(
       requestBody: fileMetadata,
       media: media,
       fields: 'id, webViewLink',
+      supportsAllDrives: true,
     });
 
     const fileId = uploadedFile.data.id;
@@ -114,7 +246,9 @@ export async function uploadFileToDrive(
     return { fileId, fileUrl };
   } catch (error) {
     console.error(`Error uploading file ${file.name}:`, error);
-    throw new Error(`Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
@@ -139,7 +273,6 @@ export async function uploadFilesToDrive(
     } catch (error) {
       console.error(`Failed to upload ${file.name}:`, error);
       // Continue with other files even if one fails
-      // Error will be logged in submission document
     }
   }
 
@@ -166,6 +299,7 @@ export async function setFolderPermissions(
           emailAddress: email,
         },
         sendNotificationEmail: false,
+        supportsAllDrives: true,
       });
     }
   } catch (error) {
@@ -176,26 +310,29 @@ export async function setFolderPermissions(
 
 /**
  * Complete Google Drive integration
- * Creates folder, uploads files, and sets permissions
+ * Creates folder structure, uploads files to Attachments, and sets permissions
  */
-export async function handleGoogleDriveIntegration(
-  formData: FormData
-): Promise<{
+export async function handleGoogleDriveIntegration(formData: FormData): Promise<{
   folderId: string;
   folderUrl: string;
   uploadedFiles: Array<{ id: string; name: string; url: string }>;
 }> {
-  // Create folder
-  const { folderId, folderUrl } = await createGoogleDriveFolder(formData);
+  // Create full folder structure
+  const { folderId, folderUrl, attachmentsFolderId } =
+    await createGoogleDriveFolderStructure(formData);
 
-  // Upload files if any
+  // Upload files to Attachments subfolder if any
   let uploadedFiles: Array<{ id: string; name: string; url: string }> = [];
   if (formData.attachments && formData.attachments.length > 0) {
-    uploadedFiles = await uploadFilesToDrive(formData.attachments, folderId);
+    uploadedFiles = await uploadFilesToDrive(formData.attachments, attachmentsFolderId);
   }
 
   // Set permissions for collaborators if specified
-  if (formData.addCollaborators && formData.collaborators && formData.collaborators.length > 0) {
+  if (
+    formData.addCollaborators &&
+    formData.collaborators &&
+    formData.collaborators.length > 0
+  ) {
     await setFolderPermissions(folderId, formData.collaborators, 'writer');
   }
 
