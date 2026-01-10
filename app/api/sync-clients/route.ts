@@ -39,7 +39,7 @@ interface CommonSKUClient {
 
 /**
  * Fetch all clients from CommonSKU API
- * Handles pagination if necessary
+ * Uses cursor-based pagination
  */
 async function fetchAllClientsFromCommonSKU(): Promise<CommonSKUClient[]> {
   if (!COMMONSKU_API_KEY) {
@@ -47,43 +47,47 @@ async function fetchAllClientsFromCommonSKU(): Promise<CommonSKUClient[]> {
   }
 
   const allClients: CommonSKUClient[] = [];
-  let page = 1;
-  let hasMore = true;
+  let cursor: string | null = null;
+  let pageNum = 1;
+  const maxPages = 500; // Safety limit
 
-  while (hasMore) {
-    const response = await fetch(
-      `${COMMONSKU_BASE_URL}/clients?page=${page}&per_page=100`,
-      {
-        headers: {
-          'x-api-key': COMMONSKU_API_KEY,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+  while (pageNum <= maxPages) {
+    const url = cursor
+      ? `${COMMONSKU_BASE_URL}/clients?cursor=${encodeURIComponent(cursor)}`
+      : `${COMMONSKU_BASE_URL}/clients?per_page=100`;
+
+    const response = await fetch(url, {
+      headers: {
+        'x-api-key': COMMONSKU_API_KEY,
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`CommonSKU API error: ${response.status}`);
     }
 
     const responseData = await response.json();
-    // CommonSKU returns clients in 'data' array, not 'clients'
     const clients = responseData.data || [];
+    const meta = responseData.meta || {};
 
     allClients.push(...clients);
-    console.log(`Page ${page}: fetched ${clients.length} clients`);
+    console.log(
+      `Page ${pageNum}: fetched ${clients.length} clients (total: ${allClients.length})`
+    );
 
-    // Check if there are more pages (API returns 50 per page by default)
-    if (clients.length === 0) {
-      hasMore = false;
+    // Check if there's a next page via cursor
+    if (meta.cursor && clients.length > 0) {
+      cursor = meta.cursor;
+      pageNum++;
     } else {
-      page++;
+      // No more pages
+      break;
     }
+  }
 
-    // Safety limit to prevent infinite loops
-    if (page > 200) {
-      console.warn('Reached maximum page limit (200)');
-      hasMore = false;
-    }
+  if (pageNum > maxPages) {
+    console.warn(`Reached maximum page limit (${maxPages})`);
   }
 
   return allClients;
