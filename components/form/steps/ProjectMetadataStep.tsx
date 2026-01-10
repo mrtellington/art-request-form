@@ -26,9 +26,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Loader2, CheckCircle } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
+import { UserAutocomplete } from '../fields/UserAutocomplete';
 
 // Dynamically import RichTextEditor to reduce initial bundle size
 const RichTextEditor = dynamic(
@@ -66,50 +66,11 @@ export function ProjectMetadataStep() {
   const addCollaborators = watch('addCollaborators') || false;
   const collaborators = watch('collaborators') || [];
 
-  const [collaboratorEmail, setCollaboratorEmail] = useState('');
-  const [isValidating, setIsValidating] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
-
-  const handleAddCollaborator = async () => {
-    if (!collaboratorEmail || !collaboratorEmail.includes('@')) {
-      setValidationError('Please enter a valid email address');
-      return;
-    }
-
-    // Check if already added
-    if (collaborators.includes(collaboratorEmail)) {
-      setValidationError('This collaborator has already been added');
-      return;
-    }
-
-    setIsValidating(true);
-    setValidationError(null);
-
-    try {
-      // Validate email exists in Asana
-      const response = await fetch(
-        `/api/validate-collaborator?email=${encodeURIComponent(collaboratorEmail)}`
-      );
-      const result = await response.json();
-
-      if (!result.valid) {
-        setValidationError(
-          `${collaboratorEmail} is not found in Asana. Please ensure they have an active Asana account.`
-        );
-        return;
-      }
-
-      // Email is valid, add to collaborators
-      setValue('collaborators', [...collaborators, collaboratorEmail], {
-        shouldValidate: true,
-      });
-      setCollaboratorEmail('');
-    } catch (error) {
-      console.error('Error validating collaborator:', error);
-      setValidationError('Failed to validate email. Please try again.');
-    } finally {
-      setIsValidating(false);
-    }
+  const handleAddCollaborator = (user: { gid: string; name: string; email: string }) => {
+    // User is already validated since they come from Asana search
+    setValue('collaborators', [...collaborators, user.email], {
+      shouldValidate: true,
+    });
   };
 
   const handleRemoveCollaborator = (index: number) => {
@@ -321,47 +282,13 @@ export function ProjectMetadataStep() {
         {addCollaborators && (
           <div className="space-y-3">
             <p className="text-sm text-zinc-600">
-              Add team members who should be notified about this request. They must have
-              an active Asana account.
+              Search for team members by name or email to add as collaborators.
             </p>
-            <div className="flex gap-2">
-              <Input
-                type="email"
-                value={collaboratorEmail}
-                onChange={(e) => {
-                  setCollaboratorEmail(e.target.value);
-                  setValidationError(null);
-                }}
-                placeholder="colleague@whitestonebranding.com"
-                disabled={isValidating}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddCollaborator();
-                  }
-                }}
-              />
-              <button
-                type="button"
-                onClick={handleAddCollaborator}
-                disabled={isValidating || !collaboratorEmail}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[80px] justify-center"
-              >
-                {isValidating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  </>
-                ) : (
-                  'Add'
-                )}
-              </button>
-            </div>
-
-            {validationError && (
-              <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 px-3 py-2 rounded">
-                {validationError}
-              </p>
-            )}
+            <UserAutocomplete
+              onSelect={handleAddCollaborator}
+              excludeEmails={collaborators}
+              placeholder="Search by name or email..."
+            />
 
             {collaborators.length > 0 && (
               <div className="space-y-2">

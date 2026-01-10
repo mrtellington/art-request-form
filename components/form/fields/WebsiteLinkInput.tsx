@@ -2,10 +2,12 @@
  * Website Link Input Component
  *
  * Input fields for a single website/social media link.
+ * Uses local state for URL to prevent focus loss during typing.
  */
 
 'use client';
 
+import { useState, useRef } from 'react';
 import { WebsiteLink } from '@/types/form';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -35,11 +37,40 @@ interface WebsiteLinkInputProps {
 }
 
 export function WebsiteLinkInput({ link, onChange }: WebsiteLinkInputProps) {
-  const handleChange = (field: keyof WebsiteLink, value: string) => {
+  // Use local state for URL to prevent focus loss during typing
+  // Key: use link.id as part of the state reset mechanism
+  const [localUrl, setLocalUrl] = useState(link.url);
+  const prevLinkIdRef = useRef(link.id);
+
+  // Reset local state if the link id changes (e.g., when cloning)
+  // This is the "adjusting state during render" pattern from React docs
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  /* eslint-disable react-hooks/refs */
+  if (link.id !== prevLinkIdRef.current) {
+    prevLinkIdRef.current = link.id;
+    setLocalUrl(link.url);
+  }
+  /* eslint-enable react-hooks/refs */
+
+  const handleTypeChange = (value: string) => {
     onChange({
       ...link,
-      [field]: value,
+      type: value,
     });
+  };
+
+  const handleUrlChange = (value: string) => {
+    setLocalUrl(value);
+  };
+
+  const handleUrlBlur = () => {
+    // Sync to parent on blur
+    if (localUrl !== link.url) {
+      onChange({
+        ...link,
+        url: localUrl,
+      });
+    }
   };
 
   return (
@@ -49,7 +80,7 @@ export function WebsiteLinkInput({ link, onChange }: WebsiteLinkInputProps) {
         <Label htmlFor={`link-type-${link.id}`}>
           Type <span className="text-red-500">*</span>
         </Label>
-        <Select value={link.type} onValueChange={(value) => handleChange('type', value)}>
+        <Select value={link.type} onValueChange={handleTypeChange}>
           <SelectTrigger id={`link-type-${link.id}`}>
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
@@ -71,8 +102,9 @@ export function WebsiteLinkInput({ link, onChange }: WebsiteLinkInputProps) {
         <Input
           id={`link-url-${link.id}`}
           type="text"
-          value={link.url}
-          onChange={(e) => handleChange('url', e.target.value)}
+          value={localUrl}
+          onChange={(e) => handleUrlChange(e.target.value)}
+          onBlur={handleUrlBlur}
           placeholder="https://..."
         />
       </div>

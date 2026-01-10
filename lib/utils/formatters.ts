@@ -375,12 +375,10 @@ export function stripHtml(html: string): string {
  * Convert TipTap HTML to Asana-compatible HTML
  * Preserves lists (ul, ol, li), bold, italic, links
  * Converts paragraphs and line breaks appropriately
+ * Strips unsupported attributes (Asana only allows href on anchor tags)
  */
 export function convertHtmlForAsana(html: string): string {
   if (!html) return '';
-
-  // First, escape any raw text that's not in tags (to handle special chars)
-  // But we need to preserve the HTML structure
 
   // Convert <p> tags to newlines (Asana doesn't use <p>)
   let result = html
@@ -391,9 +389,9 @@ export function convertHtmlForAsana(html: string): string {
   // Convert <br> tags to newlines
   result = result.replace(/<br\s*\/?>/gi, '\n');
 
-  // Keep supported Asana tags: strong, em, u, s, code, ul, ol, li, a
-  // TipTap uses <strong> for bold (already correct)
-  // TipTap uses <em> for italic (already correct)
+  // Strip all attributes from anchor tags except href
+  // TipTap adds class="..." which Asana rejects
+  result = result.replace(/<a\s+[^>]*href="([^"]*)"[^>]*>/gi, '<a href="$1">');
 
   // Remove any unsupported tags but keep their content
   // Asana supports: strong, em, u, s, code, ol, ul, li, a

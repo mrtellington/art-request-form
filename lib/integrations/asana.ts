@@ -20,6 +20,11 @@ const ASANA_TAGS = {
 // Cache for user GID lookups
 const userGidCache = new Map<string, string | null>();
 
+// Cache for full user list (for autocomplete)
+let userListCache: Array<{ gid: string; name: string; email: string }> | null = null;
+let userListCacheTime = 0;
+const USER_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 /**
  * Get Asana API headers
  */
@@ -34,6 +39,84 @@ function getAsanaHeaders(): HeadersInit {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
   };
+}
+
+/**
+ * Get all Asana users in the workspace
+ * Uses caching to reduce API calls
+ */
+export async function getAsanaUsers(): Promise<
+  Array<{ gid: string; name: string; email: string }>
+> {
+  // Check cache
+  if (userListCache && Date.now() - userListCacheTime < USER_CACHE_TTL) {
+    return userListCache;
+  }
+
+  try {
+    const workspaceId = process.env.ASANA_WORKSPACE_ID;
+    if (!workspaceId) {
+      console.warn('ASANA_WORKSPACE_ID not set, cannot fetch users');
+      return [];
+    }
+
+    const response = await fetch(
+      `${ASANA_API_URL}/workspaces/${workspaceId}/users?opt_fields=email,name`,
+      { headers: getAsanaHeaders() }
+    );
+
+    if (!response.ok) {
+      console.error('Failed to fetch Asana users');
+      return [];
+    }
+
+    const result = await response.json();
+    const users = (result.data || [])
+      .filter((u: { email?: string; name?: string }) => u.email && u.name)
+      .map((u: { gid: string; name: string; email: string }) => ({
+        gid: u.gid,
+        name: u.name,
+        email: u.email,
+      }));
+
+    // Update cache
+    userListCache = users;
+    userListCacheTime = Date.now();
+
+    // Also populate the GID cache
+    for (const user of users) {
+      userGidCache.set(user.email.toLowerCase(), user.gid);
+    }
+
+    return users;
+  } catch (error) {
+    console.error('Error fetching Asana users:', error);
+    return [];
+  }
+}
+
+/**
+ * Search Asana users by name or email
+ * Returns matching users for autocomplete
+ */
+export async function searchAsanaUsers(
+  query: string
+): Promise<Array<{ gid: string; name: string; email: string }>> {
+  const users = await getAsanaUsers();
+
+  if (!query || query.length < 2) {
+    return [];
+  }
+
+  const lowerQuery = query.toLowerCase();
+
+  return users
+    .filter(
+      (user) =>
+        user.name.toLowerCase().includes(lowerQuery) ||
+        user.email.toLowerCase().includes(lowerQuery)
+    )
+    .slice(0, 10); // Limit to 10 results
 }
 
 /**

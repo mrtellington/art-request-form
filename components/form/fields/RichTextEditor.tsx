@@ -80,10 +80,11 @@ export function RichTextEditor({
           type="button"
           variant={editor.isActive('bold') ? 'default' : 'ghost'}
           size="sm"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleBold().run()}
           disabled={!editor.can().chain().focus().toggleBold().run()}
           className="h-8 w-8 p-0"
-          title="Bold"
+          title="Bold (⌘B)"
         >
           <Bold className="h-4 w-4" />
         </Button>
@@ -92,10 +93,11 @@ export function RichTextEditor({
           type="button"
           variant={editor.isActive('italic') ? 'default' : 'ghost'}
           size="sm"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleItalic().run()}
           disabled={!editor.can().chain().focus().toggleItalic().run()}
           className="h-8 w-8 p-0"
-          title="Italic"
+          title="Italic (⌘I)"
         >
           <Italic className="h-4 w-4" />
         </Button>
@@ -104,9 +106,10 @@ export function RichTextEditor({
           type="button"
           variant={editor.isActive('link') ? 'default' : 'ghost'}
           size="sm"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={setLink}
           className="h-8 w-8 p-0"
-          title="Add Link"
+          title="Add Link (⌘K)"
         >
           <Link2 className="h-4 w-4" />
         </Button>
@@ -117,6 +120,7 @@ export function RichTextEditor({
           type="button"
           variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
           size="sm"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           disabled={!editor.can().chain().focus().toggleBulletList().run()}
           className="h-8 w-8 p-0"
@@ -129,6 +133,7 @@ export function RichTextEditor({
           type="button"
           variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
           size="sm"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           disabled={!editor.can().chain().focus().toggleOrderedList().run()}
           className="h-8 w-8 p-0"
