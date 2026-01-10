@@ -11,6 +11,7 @@ import { useAuth } from '@/lib/firebase/AuthContext';
 import { signInWithGoogle } from '@/lib/firebase/auth';
 import { Button } from '@/components/ui/button';
 import { FormContainer } from '@/components/form/FormContainer';
+import { FormData } from '@/types/form';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -26,8 +27,8 @@ export default function RequestPage() {
 
     try {
       await signInWithGoogle();
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to sign in');
       setSigningIn(false);
     }
   };
@@ -50,9 +51,7 @@ export default function RequestPage() {
       <div className="flex min-h-screen items-center justify-center bg-zinc-50">
         <div className="max-w-md w-full mx-4">
           <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-            <h1 className="text-3xl font-bold text-zinc-900 mb-2">
-              Art Request Form
-            </h1>
+            <h1 className="text-3xl font-bold text-zinc-900 mb-2">Art Request Form</h1>
             <p className="text-zinc-600 mb-6">
               Sign in with your @whitestonebranding.com account to submit art requests.
             </p>
@@ -82,7 +81,7 @@ export default function RequestPage() {
   }
 
   // Handle form submission
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: FormData) => {
     try {
       // Call submission API
       const response = await fetch('/api/submit', {
@@ -122,16 +121,12 @@ export default function RequestPage() {
         <div className="max-w-4xl mx-auto mb-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-zinc-900">
-                Art Request Form
-              </h1>
+              <h1 className="text-3xl font-bold text-zinc-900">Art Request Form</h1>
               <p className="text-zinc-600 mt-1">
                 Submit your art request with all necessary details
               </p>
             </div>
-            <div className="text-sm text-zinc-600">
-              Signed in as {user.email}
-            </div>
+            <div className="text-sm text-zinc-600">Signed in as {user.email}</div>
           </div>
         </div>
 
@@ -140,6 +135,7 @@ export default function RequestPage() {
           onSubmit={handleSubmit}
           userId={user.uid}
           userEmail={user.email || ''}
+          userName={user.displayName || ''}
         />
       </div>
     </div>

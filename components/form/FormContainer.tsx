@@ -34,6 +34,7 @@ interface FormContainerProps {
   initialData?: Partial<FormData>;
   userId: string;
   userEmail: string;
+  userName?: string;
 }
 
 export function FormContainer({
@@ -41,6 +42,7 @@ export function FormContainer({
   initialData,
   userId,
   userEmail,
+  userName,
 }: FormContainerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -52,6 +54,7 @@ export function FormContainer({
       ...initialFormData,
       ...initialData,
       requestorEmail: userEmail,
+      requestorName: userName || initialData?.requestorName || '',
     },
     mode: 'onChange',
   });
@@ -181,18 +184,14 @@ export function FormContainer({
               {isSaving ? (
                 <span>Saving draft...</span>
               ) : lastSaved ? (
-                <span>
-                  Draft saved at {lastSaved.toLocaleTimeString()}
-                </span>
+                <span>Draft saved at {lastSaved.toLocaleTimeString()}</span>
               ) : null}
             </div>
           )}
 
           {/* Step Header */}
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-zinc-900">
-              {currentStep.label}
-            </h2>
+            <h2 className="text-2xl font-bold text-zinc-900">{currentStep.label}</h2>
             {currentStep.description && (
               <p className="text-zinc-600 mt-1">{currentStep.description}</p>
             )}
@@ -230,7 +229,14 @@ function getStepFields(stepId: string): (keyof FormData)[] {
       return ['requestorName', 'requestorEmail', 'region', 'requestTitle', 'dueDate'];
     case 'requestDetails':
       // Conditional fields based on request type
-      return ['mockupType', 'pptxType', 'numberOfSlides', 'proofType', 'sneakPeekOptions', 'riseAndShineLevel'];
+      return [
+        'mockupType',
+        'pptxType',
+        'numberOfSlides',
+        'proofType',
+        'sneakPeekOptions',
+        'riseAndShineLevel',
+      ];
     case 'products':
       return ['products'];
     case 'projectMetadata':
