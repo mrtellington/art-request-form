@@ -82,6 +82,23 @@ export function FormContainer({
     canGoPrev,
   } = useStepNavigation(formData);
 
+  // Handle form submission
+  const handleFormSubmit = useCallback(
+    async (data: FormData) => {
+      setIsSubmitting(true);
+      try {
+        await onSubmit(data);
+      } catch (error) {
+        console.error('Form submission error:', error);
+        // Error handling will be improved in later phases
+        alert('Failed to submit form. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [onSubmit]
+  );
+
   // Validate current step before moving to next
   const handleNext = useCallback(async () => {
     // Get fields for current step
@@ -125,23 +142,6 @@ export function FormContainer({
       }
     },
     [currentStepIndex, goToStep]
-  );
-
-  // Handle form submission
-  const handleFormSubmit = useCallback(
-    async (data: FormData) => {
-      setIsSubmitting(true);
-      try {
-        await onSubmit(data);
-      } catch (error) {
-        console.error('Form submission error:', error);
-        // Error handling will be improved in later phases
-        alert('Failed to submit form. Please try again.');
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [onSubmit]
   );
 
   // Render current step component
