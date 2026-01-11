@@ -45,6 +45,11 @@ export const riseAndShineLevelSchema = z.enum(['Bronze', 'Silver', 'Gold']);
 export const labelSchema = z.enum(['Call Needed', 'Rush', 'Needs Creative']);
 
 /**
+ * Client Type Schema
+ */
+export const clientTypeSchema = z.enum(['Prospect', 'Client', 'Enterprise']);
+
+/**
  * Product Schema
  * Uses object structure instead of parallel arrays
  */
@@ -115,7 +120,7 @@ export const formDataSchema = z
     projectNumber: z.string().optional(),
     projectValue: projectValueSchema.nullable(),
     billable: billableSchema.nullable(),
-    clientType: z.string().nullable(),
+    clientType: clientTypeSchema.nullable(),
 
     // Collaborators
     addCollaborators: z.boolean(),
@@ -239,7 +244,7 @@ export const projectMetadataStepSchema = z.object({
   projectNumber: z.string().optional(),
   projectValue: projectValueSchema,
   billable: billableSchema,
-  clientType: z.string().nullable(),
+  clientType: clientTypeSchema.nullable(),
   addCollaborators: z.boolean(),
   collaborators: z.array(emailSchema),
   labels: z.array(labelSchema),

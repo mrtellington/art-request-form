@@ -52,7 +52,7 @@ async function fetchAllClientsFromCommonSKU(): Promise<CommonSKUClient[]> {
   const maxPages = 500; // Safety limit
 
   while (pageNum <= maxPages) {
-    const url = cursor
+    const url: string = cursor
       ? `${COMMONSKU_BASE_URL}/clients?cursor=${encodeURIComponent(cursor)}`
       : `${COMMONSKU_BASE_URL}/clients?per_page=100`;
 

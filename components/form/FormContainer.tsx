@@ -19,14 +19,12 @@ import { FormNavigation } from './FormNavigation';
 import { Card } from '@/components/ui/card';
 import { Save } from 'lucide-react';
 
-// Import step components (will be created next)
+// Import step components
 import { RequestTypeStep } from './steps/RequestTypeStep';
-import { ClientStep } from './steps/ClientStep';
-import { BasicInfoStep } from './steps/BasicInfoStep';
+import { ProjectDetailsStep } from './steps/ProjectDetailsStep';
 import { RequestDetailsStep } from './steps/RequestDetailsStep';
 import { ProductsStep } from './steps/ProductsStep';
-import { ProjectMetadataStep } from './steps/ProjectMetadataStep';
-import { AttachmentsStep } from './steps/AttachmentsStep';
+import { AdditionalInfoStep } from './steps/AdditionalInfoStep';
 import { ReviewStep } from './steps/ReviewStep';
 
 interface FormContainerProps {
@@ -143,18 +141,14 @@ export function FormContainer({
     switch (currentStep.id) {
       case 'requestType':
         return <RequestTypeStep />;
-      case 'client':
-        return <ClientStep />;
-      case 'basicInfo':
-        return <BasicInfoStep />;
+      case 'projectDetails':
+        return <ProjectDetailsStep />;
       case 'requestDetails':
         return <RequestDetailsStep />;
       case 'products':
         return <ProductsStep />;
-      case 'projectMetadata':
-        return <ProjectMetadataStep />;
-      case 'attachments':
-        return <AttachmentsStep />;
+      case 'additionalInfo':
+        return <AdditionalInfoStep />;
       case 'review':
         return <ReviewStep />;
       default:
@@ -223,26 +217,36 @@ function getStepFields(stepId: string): (keyof FormData)[] {
   switch (stepId) {
     case 'requestType':
       return ['requestType'];
-    case 'client':
-      return ['clientName', 'clientExists'];
-    case 'basicInfo':
-      return ['requestorName', 'requestorEmail', 'region', 'requestTitle', 'dueDate'];
+    case 'projectDetails':
+      return [
+        'clientName',
+        'clientExists',
+        'requestorName',
+        'requestorEmail',
+        'region',
+        'requestTitle',
+        'dueDate',
+      ];
     case 'requestDetails':
       // Conditional fields based on request type
       return [
         'mockupType',
         'pptxType',
         'numberOfSlides',
-        'proofType',
         'sneakPeekOptions',
         'riseAndShineLevel',
       ];
     case 'products':
       return ['products'];
-    case 'projectMetadata':
-      return ['projectValue', 'billable', 'labels'];
-    case 'attachments':
-      return ['attachments', 'websiteLinks'];
+    case 'additionalInfo':
+      return [
+        'projectValue',
+        'billable',
+        'clientType',
+        'labels',
+        'attachments',
+        'websiteLinks',
+      ];
     case 'review':
       // Review step validates all fields
       return Object.keys(initialFormData) as (keyof FormData)[];

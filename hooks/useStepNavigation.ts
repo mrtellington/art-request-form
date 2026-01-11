@@ -45,14 +45,9 @@ export function useStepNavigation(formData: Partial<FormData>): UseStepNavigatio
         description: 'What type of request is this?',
       },
       {
-        id: 'client',
-        label: 'Client Info',
-        description: 'Who is this request for?',
-      },
-      {
-        id: 'basicInfo',
-        label: 'Basic Details',
-        description: 'Request details and timeline',
+        id: 'projectDetails',
+        label: 'Project Details',
+        description: 'Client, requestor, and timeline information',
       },
     ];
 
@@ -65,11 +60,11 @@ export function useStepNavigation(formData: Partial<FormData>): UseStepNavigatio
       });
     }
 
-    // Add Products step for Mockup and Proofs requests (before Project Info)
+    // Add Product Details step for Mockup and Proofs requests
     if (formData.requestType === 'Mockup' || formData.requestType === 'Proofs') {
       baseSteps.push({
         id: 'products',
-        label: 'Products',
+        label: 'Product Details',
         description:
           formData.requestType === 'Mockup'
             ? 'Product information for mockup'
@@ -77,26 +72,19 @@ export function useStepNavigation(formData: Partial<FormData>): UseStepNavigatio
       });
     }
 
-    // Always include Project Info step
+    // Additional Information step (combines project metadata, pertinent info, websites, attachments)
     baseSteps.push({
-      id: 'projectMetadata',
-      label: 'Project Info',
-      description: 'Budget, collaborators, and labels',
+      id: 'additionalInfo',
+      label: 'Additional Information',
+      description: 'Project info, links, and attachments',
     });
 
-    // Final steps
-    baseSteps.push(
-      {
-        id: 'attachments',
-        label: 'Attachments',
-        description: 'Files and reference links',
-      },
-      {
-        id: 'review',
-        label: 'Review & Submit',
-        description: 'Review your request before submitting',
-      }
-    );
+    // Review step
+    baseSteps.push({
+      id: 'review',
+      label: 'Review & Submit',
+      description: 'Review your request before submitting',
+    });
 
     return baseSteps;
   }, [formData.requestType]);

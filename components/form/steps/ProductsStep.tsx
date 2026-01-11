@@ -1,8 +1,8 @@
 /**
- * Products Step
+ * Product Details Step
  *
- * Step for adding products (only shown for Mockup requests).
- * Uses RepeatableSection with clone and add blank functionality.
+ * Step for adding products (shown for Mockup and Proofs requests).
+ * Uses RepeatableSection with clone and add functionality.
  */
 
 'use client';
@@ -56,7 +56,7 @@ export function ProductsStep() {
         )}
         emptyTemplate={emptyProduct}
         title="Products"
-        description="Add all products that need to be included in this mockup"
+        description="Add all products that need to be included in this request"
         minItems={1}
         addButtonLabel="Add Product"
         cloneButtonLabel="Clone This"
