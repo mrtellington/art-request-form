@@ -30,9 +30,7 @@ export interface UseStepNavigationReturn {
 /**
  * Hook to manage form step navigation
  */
-export function useStepNavigation(
-  formData: Partial<FormData>
-): UseStepNavigationReturn {
+export function useStepNavigation(formData: Partial<FormData>): UseStepNavigationReturn {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   /**
@@ -56,14 +54,18 @@ export function useStepNavigation(
         label: 'Basic Details',
         description: 'Request details and timeline',
       },
-      {
+    ];
+
+    // Add Request Details step for all types except Proofs
+    if (formData.requestType !== 'Proofs') {
+      baseSteps.push({
         id: 'requestDetails',
         label: 'Request Details',
         description: 'Specific details for your request type',
-      },
-    ];
+      });
+    }
 
-    // Add Products step only for Mockup requests
+    // Add Products step for Mockup requests
     if (formData.requestType === 'Mockup') {
       baseSteps.push({
         id: 'products',
@@ -72,13 +74,24 @@ export function useStepNavigation(
       });
     }
 
-    // Always include final steps
+    // Always include Project Info step
+    baseSteps.push({
+      id: 'projectMetadata',
+      label: 'Project Info',
+      description: 'Budget, collaborators, and labels',
+    });
+
+    // Add Products step for Proofs requests (after Project Info)
+    if (formData.requestType === 'Proofs') {
+      baseSteps.push({
+        id: 'products',
+        label: 'Products',
+        description: 'Product information for proof',
+      });
+    }
+
+    // Final steps
     baseSteps.push(
-      {
-        id: 'projectMetadata',
-        label: 'Project Info',
-        description: 'Budget, collaborators, and labels',
-      },
       {
         id: 'attachments',
         label: 'Attachments',

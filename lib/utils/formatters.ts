@@ -223,9 +223,9 @@ export function buildAsanaDescription(formData: FormData): string {
     }
   }
 
-  // Products (for Mockup requests)
+  // Products (for Mockup and Proofs requests)
   if (
-    formData.requestType === 'Mockup' &&
+    (formData.requestType === 'Mockup' || formData.requestType === 'Proofs') &&
     formData.products &&
     formData.products.length > 0
   ) {

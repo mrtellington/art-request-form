@@ -63,12 +63,30 @@ export function WebsiteLinkInput({ link, onChange }: WebsiteLinkInputProps) {
     setLocalUrl(value);
   };
 
+  /**
+   * Normalize URL to ensure it has a protocol
+   */
+  const normalizeUrl = (url: string): string => {
+    if (!url) return url;
+    const trimmed = url.trim();
+    // If already has a protocol, return as is
+    if (/^https?:\/\//i.test(trimmed)) {
+      return trimmed;
+    }
+    // Add https:// prefix
+    return `https://${trimmed}`;
+  };
+
   const handleUrlBlur = () => {
-    // Sync to parent on blur
-    if (localUrl !== link.url) {
+    // Normalize URL and sync to parent on blur
+    const normalizedUrl = normalizeUrl(localUrl);
+    if (normalizedUrl !== localUrl) {
+      setLocalUrl(normalizedUrl);
+    }
+    if (normalizedUrl !== link.url) {
       onChange({
         ...link,
-        url: localUrl,
+        url: normalizedUrl,
       });
     }
   };

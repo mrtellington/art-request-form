@@ -10,7 +10,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
-import { Bold, Italic, Link2, List, ListOrdered } from 'lucide-react';
+import { Bold, Italic, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCallback } from 'react';
 
@@ -112,34 +112,6 @@ export function RichTextEditor({
           title="Add Link (⌘K)"
         >
           <Link2 className="h-4 w-4" />
-        </Button>
-
-        <div className="w-px h-8 bg-zinc-300 mx-1" />
-
-        <Button
-          type="button"
-          variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
-          size="sm"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          disabled={!editor.can().chain().focus().toggleBulletList().run()}
-          className="h-8 w-8 p-0"
-          title="Bullet List"
-        >
-          <List className="h-4 w-4" />
-        </Button>
-
-        <Button
-          type="button"
-          variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
-          size="sm"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          disabled={!editor.can().chain().focus().toggleOrderedList().run()}
-          className="h-8 w-8 p-0"
-          title="Numbered List"
-        >
-          <ListOrdered className="h-4 w-4" />
         </Button>
       </div>
 
