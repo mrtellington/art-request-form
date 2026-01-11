@@ -2,11 +2,12 @@
  * Product Input Component
  *
  * Input fields for a single product in the repeatable products section.
- * All fields from the Cognito form product structure.
+ * Uses local state for text fields to prevent focus loss during typing.
  */
 
 'use client';
 
+import { useState, useRef } from 'react';
 import { Product } from '@/types/form';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -18,11 +19,48 @@ interface ProductInputProps {
 }
 
 export function ProductInput({ product, onChange }: ProductInputProps) {
-  const handleChange = (field: keyof Product, value: string) => {
-    onChange({
-      ...product,
-      [field]: value,
+  // Use local state for all text fields to prevent focus loss during typing
+  const [localValues, setLocalValues] = useState({
+    name: product.name,
+    link: product.link || '',
+    color: product.color || '',
+    imprintMethod: product.imprintMethod || '',
+    imprintColor: product.imprintColor || '',
+    location: product.location || '',
+    size: product.size || '',
+    notes: product.notes || '',
+  });
+  const prevProductIdRef = useRef(product.id);
+
+  // Reset local state if product id changes (e.g., when cloning)
+  /* eslint-disable react-hooks/refs */
+  if (product.id !== prevProductIdRef.current) {
+    prevProductIdRef.current = product.id;
+    setLocalValues({
+      name: product.name,
+      link: product.link || '',
+      color: product.color || '',
+      imprintMethod: product.imprintMethod || '',
+      imprintColor: product.imprintColor || '',
+      location: product.location || '',
+      size: product.size || '',
+      notes: product.notes || '',
     });
+  }
+  /* eslint-enable react-hooks/refs */
+
+  const handleLocalChange = (field: keyof typeof localValues, value: string) => {
+    setLocalValues((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleBlur = (field: keyof Product) => {
+    const value = localValues[field as keyof typeof localValues];
+    if (value !== (product[field] || '')) {
+      onChange({
+        ...product,
+        [field]: value,
+      });
+    }
   };
 
   return (
@@ -34,8 +72,9 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
         </Label>
         <Input
           id={`product-name-${product.id}`}
-          value={product.name}
-          onChange={(e) => handleChange('name', e.target.value)}
+          value={localValues.name}
+          onChange={(e) => handleLocalChange('name', e.target.value)}
+          onBlur={() => handleBlur('name')}
           placeholder="e.g., 20oz Stainless Steel Water Bottle"
         />
       </div>
@@ -46,8 +85,9 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
         <Input
           id={`product-link-${product.id}`}
           type="text"
-          value={product.link || ''}
-          onChange={(e) => handleChange('link', e.target.value)}
+          value={localValues.link}
+          onChange={(e) => handleLocalChange('link', e.target.value)}
+          onBlur={() => handleBlur('link')}
           placeholder="https://..."
         />
       </div>
@@ -59,8 +99,9 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
           <Label htmlFor={`product-color-${product.id}`}>Color</Label>
           <Input
             id={`product-color-${product.id}`}
-            value={product.color || ''}
-            onChange={(e) => handleChange('color', e.target.value)}
+            value={localValues.color}
+            onChange={(e) => handleLocalChange('color', e.target.value)}
+            onBlur={() => handleBlur('color')}
             placeholder="e.g., Matte Black"
           />
         </div>
@@ -70,8 +111,9 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
           <Label htmlFor={`product-imprint-method-${product.id}`}>Imprint Method</Label>
           <Input
             id={`product-imprint-method-${product.id}`}
-            value={product.imprintMethod || ''}
-            onChange={(e) => handleChange('imprintMethod', e.target.value)}
+            value={localValues.imprintMethod}
+            onChange={(e) => handleLocalChange('imprintMethod', e.target.value)}
+            onBlur={() => handleBlur('imprintMethod')}
             placeholder="e.g., Laser Engraving"
           />
         </div>
@@ -81,8 +123,9 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
           <Label htmlFor={`product-imprint-color-${product.id}`}>Imprint Color</Label>
           <Input
             id={`product-imprint-color-${product.id}`}
-            value={product.imprintColor || ''}
-            onChange={(e) => handleChange('imprintColor', e.target.value)}
+            value={localValues.imprintColor}
+            onChange={(e) => handleLocalChange('imprintColor', e.target.value)}
+            onBlur={() => handleBlur('imprintColor')}
             placeholder="e.g., White"
           />
         </div>
@@ -92,8 +135,9 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
           <Label htmlFor={`product-location-${product.id}`}>Decoration Location</Label>
           <Input
             id={`product-location-${product.id}`}
-            value={product.location || ''}
-            onChange={(e) => handleChange('location', e.target.value)}
+            value={localValues.location}
+            onChange={(e) => handleLocalChange('location', e.target.value)}
+            onBlur={() => handleBlur('location')}
             placeholder="e.g., Front"
           />
         </div>
@@ -104,8 +148,9 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
         <Label htmlFor={`product-size-${product.id}`}>Decoration Size</Label>
         <Input
           id={`product-size-${product.id}`}
-          value={product.size || ''}
-          onChange={(e) => handleChange('size', e.target.value)}
+          value={localValues.size}
+          onChange={(e) => handleLocalChange('size', e.target.value)}
+          onBlur={() => handleBlur('size')}
           placeholder="e.g., 2in x 3in"
         />
       </div>
@@ -115,8 +160,9 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
         <Label htmlFor={`product-notes-${product.id}`}>Other Info</Label>
         <Textarea
           id={`product-notes-${product.id}`}
-          value={product.notes || ''}
-          onChange={(e) => handleChange('notes', e.target.value)}
+          value={localValues.notes}
+          onChange={(e) => handleLocalChange('notes', e.target.value)}
+          onBlur={() => handleBlur('notes')}
           placeholder="Additional notes or specifications..."
           rows={3}
         />

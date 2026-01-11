@@ -24,7 +24,10 @@ const emptyProduct: Omit<Product, 'id'> = {
 };
 
 export function ProductsStep() {
-  const { control, formState: { errors } } = useFormContext<FormData>();
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<FormData>();
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: 'products',
@@ -55,8 +58,8 @@ export function ProductsStep() {
         title="Products"
         description="Add all products that need to be included in this mockup"
         minItems={1}
-        addButtonLabel="Add Blank Product"
-        cloneButtonLabel="Clone This Product"
+        addButtonLabel="Add Product"
+        cloneButtonLabel="Clone This"
       />
 
       {errors.products && (

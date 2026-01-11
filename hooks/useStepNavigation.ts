@@ -65,12 +65,15 @@ export function useStepNavigation(formData: Partial<FormData>): UseStepNavigatio
       });
     }
 
-    // Add Products step for Mockup requests
-    if (formData.requestType === 'Mockup') {
+    // Add Products step for Mockup and Proofs requests (before Project Info)
+    if (formData.requestType === 'Mockup' || formData.requestType === 'Proofs') {
       baseSteps.push({
         id: 'products',
         label: 'Products',
-        description: 'Product information for mockup',
+        description:
+          formData.requestType === 'Mockup'
+            ? 'Product information for mockup'
+            : 'Product information for proof',
       });
     }
 
@@ -80,15 +83,6 @@ export function useStepNavigation(formData: Partial<FormData>): UseStepNavigatio
       label: 'Project Info',
       description: 'Budget, collaborators, and labels',
     });
-
-    // Add Products step for Proofs requests (after Project Info)
-    if (formData.requestType === 'Proofs') {
-      baseSteps.push({
-        id: 'products',
-        label: 'Products',
-        description: 'Product information for proof',
-      });
-    }
 
     // Final steps
     baseSteps.push(

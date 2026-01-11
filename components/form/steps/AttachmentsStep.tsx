@@ -68,8 +68,8 @@ export function AttachmentsStep() {
           description="Add reference links for websites, social media, or design inspiration"
           minItems={0}
           addButtonLabel="Add Website Link"
-          cloneButtonLabel="Clone Link"
           hideItemLabels
+          showCloneButton={false}
         />
       </div>
     </div>

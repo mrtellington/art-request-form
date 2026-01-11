@@ -24,6 +24,7 @@ interface RepeatableSectionProps<T extends { id: string }> {
   addButtonLabel?: string;
   cloneButtonLabel?: string;
   hideItemLabels?: boolean;
+  showCloneButton?: boolean;
 }
 
 export function RepeatableSection<T extends { id: string }>({
@@ -36,11 +37,16 @@ export function RepeatableSection<T extends { id: string }>({
   title,
   description,
   minItems = 0,
-  addButtonLabel = 'Add Blank',
-  cloneButtonLabel = 'Clone',
+  addButtonLabel = 'Add',
+  cloneButtonLabel = 'Clone This',
   hideItemLabels = false,
+  showCloneButton = true,
 }: RepeatableSectionProps<T>) {
   const canRemove = items.length > minItems;
+
+  const handleAdd = () => {
+    onAdd({ ...emptyTemplate, id: crypto.randomUUID() } as T);
+  };
 
   return (
     <div className="space-y-4">
@@ -64,18 +70,6 @@ export function RepeatableSection<T extends { id: string }>({
                 </span>
               )}
               <div className={`flex gap-2 ${hideItemLabels ? 'ml-auto' : ''}`}>
-                {/* Clone Button */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onClone(index)}
-                  className="gap-2"
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                  {cloneButtonLabel}
-                </Button>
-
                 {/* Remove Button */}
                 {canRemove && (
                   <Button
@@ -98,20 +92,49 @@ export function RepeatableSection<T extends { id: string }>({
                 // Update callback handled by parent
               })}
             </div>
+
+            {/* Action Buttons - Add and Clone together at bottom */}
+            <div className="flex gap-2 mt-4 pt-4 border-t border-zinc-200">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAdd}
+                className="gap-2"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {addButtonLabel}
+              </Button>
+
+              {showCloneButton && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onClone(index)}
+                  className="gap-2"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  {cloneButtonLabel}
+                </Button>
+              )}
+            </div>
           </Card>
         ))}
       </div>
 
-      {/* Add Blank Button */}
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => onAdd({ ...emptyTemplate, id: crypto.randomUUID() } as T)}
-        className="gap-2 w-full"
-      >
-        <Plus className="h-4 w-4" />
-        {addButtonLabel}
-      </Button>
+      {/* Add Button - Only show when no items exist */}
+      {items.length === 0 && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleAdd}
+          className="gap-2 w-full"
+        >
+          <Plus className="h-4 w-4" />
+          {addButtonLabel}
+        </Button>
+      )}
     </div>
   );
 }
