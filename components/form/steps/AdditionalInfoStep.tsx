@@ -125,34 +125,6 @@ export function AdditionalInfoStep() {
     <div className="space-y-8">
       {/* Project Metadata Section */}
       <div className="space-y-6">
-        {/* Project Number */}
-        <div>
-          <Label htmlFor="projectNumber">
-            Project# <span className="text-zinc-500 text-sm">(Optional)</span>
-          </Label>
-          <p className="text-sm text-zinc-600 mt-1 mb-3">
-            commonsku project reference number (numbers only)
-          </p>
-          <Input
-            id="projectNumber"
-            {...register('projectNumber', {
-              pattern: {
-                value: /^[0-9]*$/,
-                message: 'Project# must contain only numbers',
-              },
-            })}
-            placeholder="e.g., 12345"
-            inputMode="numeric"
-            onChange={(e) => {
-              const value = e.target.value.replace(/[^0-9]/g, '');
-              setValue('projectNumber', value);
-            }}
-          />
-          {errors.projectNumber && (
-            <p className="text-sm text-red-600 mt-2">{errors.projectNumber.message}</p>
-          )}
-        </div>
-
         {/* Project Value */}
         <div>
           <Label htmlFor="projectValue">

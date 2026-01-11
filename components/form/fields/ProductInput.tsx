@@ -53,8 +53,27 @@ export function ProductInput({ product, onChange }: ProductInputProps) {
     setLocalValues((prev) => ({ ...prev, [field]: value }));
   };
 
+  /**
+   * Normalize URL to ensure it has a protocol
+   */
+  const normalizeUrl = (url: string): string => {
+    if (!url) return url;
+    const trimmed = url.trim();
+    if (/^https?:\/\//i.test(trimmed)) {
+      return trimmed;
+    }
+    return `https://${trimmed}`;
+  };
+
   const handleBlur = (field: keyof Product) => {
-    const value = localValues[field as keyof typeof localValues];
+    let value = localValues[field as keyof typeof localValues];
+
+    // Normalize URL for link field
+    if (field === 'link' && value) {
+      value = normalizeUrl(value);
+      setLocalValues((prev) => ({ ...prev, link: value }));
+    }
+
     if (value !== (product[field] || '')) {
       onChange({
         ...product,

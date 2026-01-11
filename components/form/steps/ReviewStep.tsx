@@ -414,13 +414,14 @@ export function ReviewStep() {
         </Card>
       )}
 
-      {/* Note about Phase 4 */}
+      {/* What Happens Next */}
       <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded text-sm">
-        <p className="font-medium">Phase 4 Note</p>
+        <p className="font-medium">What Happens Next?</p>
         <p className="mt-1">
-          Upon submission, backend integrations will create Google Drive folder, upload
-          files, create Asana task, and send Slack notification. These features will be
-          implemented in Phase 4: Backend Integrations.
+          Upon submission, we will automatically create the Google Drive folder (if
+          applicable), upload your attached files, and create the ARF in Asana. After
+          successful submission, links to the folders and ARF will display on the screen.
+          Please review the ARF to ensure everything is accurate.
         </p>
       </div>
     </div>

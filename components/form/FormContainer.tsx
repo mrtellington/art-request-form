@@ -225,6 +225,7 @@ function getStepFields(stepId: string): (keyof FormData)[] {
         'requestorEmail',
         'region',
         'requestTitle',
+        'projectNumber',
         'dueDate',
       ];
     case 'requestDetails':

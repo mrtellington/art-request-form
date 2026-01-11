@@ -2,10 +2,11 @@
  * Project Details Step
  *
  * Combined step for client info and basic request details:
+ * - Requestor name and email (same line)
  * - Client name with autocomplete
- * - Requestor name and email
  * - Region
  * - Request title
+ * - Project number
  * - Due date and time
  */
 
@@ -131,6 +132,44 @@ export function ProjectDetailsStep() {
 
   return (
     <div className="space-y-6">
+      {/* Your Name and Email on same line */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="requestorName" className="text-base font-semibold">
+            Your Name <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="requestorName"
+            tabIndex={1}
+            {...register('requestorName')}
+            placeholder="First Last"
+            className="mt-2"
+          />
+          {errors.requestorName && (
+            <p className="text-sm text-red-600 mt-2">{errors.requestorName.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="requestorEmail" className="text-base font-semibold">
+            Your Email <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="requestorEmail"
+            type="email"
+            tabIndex={2}
+            {...register('requestorEmail')}
+            placeholder="you@whitestonebranding.com"
+            className="mt-2"
+            readOnly
+          />
+          <p className="text-xs text-zinc-500 mt-1">Auto-filled from your login</p>
+          {errors.requestorEmail && (
+            <p className="text-sm text-red-600 mt-2">{errors.requestorEmail.message}</p>
+          )}
+        </div>
+      </div>
+
       {/* Client Name with Autocomplete */}
       <div>
         <Label htmlFor="clientName" className="text-base font-semibold">
@@ -145,6 +184,7 @@ export function ProjectDetailsStep() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
             <Input
               id="clientName"
+              tabIndex={3}
               {...registerProps}
               ref={(e) => {
                 registerRef(e);
@@ -180,6 +220,7 @@ export function ProjectDetailsStep() {
                 <button
                   key={client.id}
                   type="button"
+                  tabIndex={-1}
                   onClick={() => handleSelectClient(client)}
                   className="w-full px-4 py-3 text-left hover:bg-zinc-50 focus:bg-zinc-50 focus:outline-none border-b border-zinc-100 last:border-b-0 transition-colors"
                 >
@@ -219,46 +260,6 @@ export function ProjectDetailsStep() {
       <input type="hidden" {...register('clientExists')} />
       <input type="hidden" {...register('clientId')} />
 
-      {/* Divider */}
-      <div className="border-t border-zinc-200 pt-6" />
-
-      {/* Requestor Name */}
-      <div>
-        <Label htmlFor="requestorName" className="text-base font-semibold">
-          Your Name <span className="text-red-500">*</span>
-        </Label>
-        <Input
-          id="requestorName"
-          {...register('requestorName')}
-          placeholder="First Last"
-          className="mt-2"
-        />
-        {errors.requestorName && (
-          <p className="text-sm text-red-600 mt-2">{errors.requestorName.message}</p>
-        )}
-      </div>
-
-      {/* Requestor Email */}
-      <div>
-        <Label htmlFor="requestorEmail" className="text-base font-semibold">
-          Your Email <span className="text-red-500">*</span>
-        </Label>
-        <Input
-          id="requestorEmail"
-          type="email"
-          {...register('requestorEmail')}
-          placeholder="you@whitestonebranding.com"
-          className="mt-2"
-          readOnly
-        />
-        <p className="text-xs text-zinc-500 mt-1">
-          Your email is auto-filled from your login
-        </p>
-        {errors.requestorEmail && (
-          <p className="text-sm text-red-600 mt-2">{errors.requestorEmail.message}</p>
-        )}
-      </div>
-
       {/* Region */}
       <div>
         <Label htmlFor="region" className="text-base font-semibold">
@@ -273,7 +274,7 @@ export function ProjectDetailsStep() {
             setValue('region', value as Region, { shouldValidate: true })
           }
         >
-          <SelectTrigger id="region">
+          <SelectTrigger id="region" tabIndex={4}>
             <SelectValue placeholder="Select a region" />
           </SelectTrigger>
           <SelectContent>
@@ -299,6 +300,7 @@ export function ProjectDetailsStep() {
         </p>
         <Input
           id="requestTitle"
+          tabIndex={5}
           {...register('requestTitle')}
           placeholder="e.g., Water Bottle Mockup for Q1 Campaign"
           className="mt-2"
@@ -308,13 +310,48 @@ export function ProjectDetailsStep() {
         )}
       </div>
 
-      {/* Due Date */}
+      {/* Project Number */}
+      <div>
+        <Label htmlFor="projectNumber">
+          Project# <span className="text-zinc-500 text-sm">(Optional)</span>
+        </Label>
+        <p className="text-sm text-zinc-600 mt-1 mb-3">
+          commonsku project reference number (numbers only)
+        </p>
+        <Input
+          id="projectNumber"
+          tabIndex={6}
+          {...register('projectNumber', {
+            pattern: {
+              value: /^[0-9]*$/,
+              message: 'Project# must contain only numbers',
+            },
+          })}
+          placeholder="e.g., 12345"
+          inputMode="numeric"
+          onChange={(e) => {
+            const value = e.target.value.replace(/[^0-9]/g, '');
+            setValue('projectNumber', value);
+          }}
+        />
+        {errors.projectNumber && (
+          <p className="text-sm text-red-600 mt-2">{errors.projectNumber.message}</p>
+        )}
+      </div>
+
+      {/* Due Date and Time */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="dueDate" className="text-base font-semibold">
             Due Date <span className="text-red-500">*</span>
           </Label>
-          <Input id="dueDate" type="date" {...register('dueDate')} className="mt-2" />
+          <Input
+            id="dueDate"
+            type="date"
+            tabIndex={7}
+            {...register('dueDate')}
+            className="mt-2"
+          />
           {errors.dueDate && (
             <p className="text-sm text-red-600 mt-2">{errors.dueDate.message}</p>
           )}
@@ -324,7 +361,13 @@ export function ProjectDetailsStep() {
           <Label htmlFor="dueTime" className="text-base font-semibold">
             Due Time <span className="text-zinc-500 text-sm">(Optional)</span>
           </Label>
-          <Input id="dueTime" type="time" {...register('dueTime')} className="mt-2" />
+          <Input
+            id="dueTime"
+            type="time"
+            tabIndex={8}
+            {...register('dueTime')}
+            className="mt-2"
+          />
           <p className="text-xs text-zinc-500 mt-1">Eastern Standard Time</p>
           {errors.dueTime && (
             <p className="text-sm text-red-600 mt-2">{errors.dueTime.message}</p>
