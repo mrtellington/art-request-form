@@ -52,6 +52,7 @@ export function ProductsStep() {
           <ProductInput
             product={product}
             onChange={(updated) => update(index, updated)}
+            baseTabIndex={index * 10}
           />
         )}
         emptyTemplate={emptyProduct}

@@ -76,6 +76,7 @@ export function RepeatableSection<T extends { id: string }>({
                     type="button"
                     variant="destructive"
                     size="sm"
+                    tabIndex={-1}
                     onClick={() => onRemove(index)}
                     className="gap-2"
                   >
@@ -99,6 +100,7 @@ export function RepeatableSection<T extends { id: string }>({
                 type="button"
                 variant="outline"
                 size="sm"
+                tabIndex={-1}
                 onClick={handleAdd}
                 className="gap-2"
               >
@@ -111,6 +113,7 @@ export function RepeatableSection<T extends { id: string }>({
                   type="button"
                   variant="outline"
                   size="sm"
+                  tabIndex={-1}
                   onClick={() => onClone(index)}
                   className="gap-2"
                 >

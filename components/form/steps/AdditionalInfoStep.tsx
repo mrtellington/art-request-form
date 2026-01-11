@@ -370,7 +370,7 @@ export function AdditionalInfoStep() {
 
       {/* File Attachments */}
       <div>
-        <Label className="text-base font-semibold mb-3 block">Attachments or Logos</Label>
+        <Label>Attachments or Logos</Label>
         <p className="text-sm text-zinc-600 mb-4">
           Upload any files, logos, or reference materials
         </p>

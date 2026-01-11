@@ -244,6 +244,7 @@ function getStepFields(stepId: string): (keyof FormData)[] {
         'projectValue',
         'billable',
         'clientType',
+        'proofType',
         'labels',
         'attachments',
         'websiteLinks',

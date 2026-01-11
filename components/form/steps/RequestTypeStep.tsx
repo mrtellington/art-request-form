@@ -10,14 +10,7 @@
 import { useFormContext } from 'react-hook-form';
 import { FormData, RequestType } from '@/types/form';
 import { Label } from '@/components/ui/label';
-import {
-  Palette,
-  Image,
-  Presentation,
-  FileCheck,
-  Eye,
-  Sunrise,
-} from 'lucide-react';
+import { Palette, Image, Presentation, FileCheck, Eye, Sunrise } from 'lucide-react';
 
 const requestTypes: Array<{
   value: RequestType;
@@ -64,7 +57,12 @@ const requestTypes: Array<{
 ];
 
 export function RequestTypeStep() {
-  const { register, watch, setValue, formState: { errors } } = useFormContext<FormData>();
+  const {
+    register,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useFormContext<FormData>();
   const selectedType = watch('requestType');
 
   const handleSelect = (type: RequestType) => {
@@ -74,7 +72,7 @@ export function RequestTypeStep() {
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="requestType" className="text-base font-semibold">
+        <Label htmlFor="requestType">
           What type of request is this? <span className="text-red-500">*</span>
         </Label>
         <p className="text-sm text-zinc-600 mt-1">

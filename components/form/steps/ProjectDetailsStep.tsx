@@ -55,6 +55,7 @@ export function ProjectDetailsStep() {
   const [searchResults, setSearchResults] = useState<ClientResult[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedFromList, setSelectedFromList] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -70,8 +71,48 @@ export function ProjectDetailsStep() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Debounced client search
+  // Re-validate client on mount if there's an existing client name
+  // This handles the case when switching request types and returning to this step
   useEffect(() => {
+    if (hasInitialized) return;
+    setHasInitialized(true);
+
+    // If there's a client name but we need to re-validate, trigger a search
+    if (clientName && clientName.length >= 2 && !clientExists) {
+      const validateExistingClient = async () => {
+        setIsSearching(true);
+        try {
+          const response = await fetch(
+            `/api/search-clients?q=${encodeURIComponent(clientName)}`
+          );
+          const data = await response.json();
+
+          setSearchResults(data.clients || []);
+
+          const exactMatch = data.clients?.find(
+            (c: ClientResult) => c.name.toLowerCase() === clientName.toLowerCase()
+          );
+
+          if (exactMatch) {
+            setValue('clientExists', true);
+            setValue('clientId', exactMatch.id);
+          }
+        } catch (error) {
+          console.error('Client validation error:', error);
+        } finally {
+          setIsSearching(false);
+        }
+      };
+
+      validateExistingClient();
+    }
+  }, []);
+
+  // Debounced client search for user input
+  useEffect(() => {
+    // Skip the initial mount - we handle that in the initialization effect
+    if (!hasInitialized) return;
+
     if (selectedFromList) {
       setSelectedFromList(false);
       return;
@@ -117,7 +158,7 @@ export function ProjectDetailsStep() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [clientName, setValue, selectedFromList]);
+  }, [clientName, setValue, selectedFromList, hasInitialized]);
 
   const handleSelectClient = (client: ClientResult) => {
     setSelectedFromList(true);
@@ -135,7 +176,7 @@ export function ProjectDetailsStep() {
       {/* Your Name and Email on same line */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="requestorName" className="text-base font-semibold">
+          <Label htmlFor="requestorName">
             Your Name <span className="text-red-500">*</span>
           </Label>
           <Input
@@ -151,7 +192,7 @@ export function ProjectDetailsStep() {
         </div>
 
         <div>
-          <Label htmlFor="requestorEmail" className="text-base font-semibold">
+          <Label htmlFor="requestorEmail">
             Your Email <span className="text-red-500">*</span>
           </Label>
           <Input
@@ -172,7 +213,7 @@ export function ProjectDetailsStep() {
 
       {/* Client Name with Autocomplete */}
       <div>
-        <Label htmlFor="clientName" className="text-base font-semibold">
+        <Label htmlFor="clientName">
           Client Name <span className="text-red-500">*</span>
         </Label>
         <p className="text-sm text-zinc-600 mt-1 mb-3">
@@ -262,7 +303,7 @@ export function ProjectDetailsStep() {
 
       {/* Region */}
       <div>
-        <Label htmlFor="region" className="text-base font-semibold">
+        <Label htmlFor="region">
           Region <span className="text-red-500">*</span>
         </Label>
         <p className="text-sm text-zinc-600 mt-1 mb-3">
@@ -292,7 +333,7 @@ export function ProjectDetailsStep() {
 
       {/* Request Title */}
       <div>
-        <Label htmlFor="requestTitle" className="text-base font-semibold">
+        <Label htmlFor="requestTitle">
           Request Title <span className="text-red-500">*</span>
         </Label>
         <p className="text-sm text-zinc-600 mt-1 mb-3">
@@ -342,7 +383,7 @@ export function ProjectDetailsStep() {
       {/* Due Date and Time */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="dueDate" className="text-base font-semibold">
+          <Label htmlFor="dueDate">
             Due Date <span className="text-red-500">*</span>
           </Label>
           <Input
@@ -358,7 +399,7 @@ export function ProjectDetailsStep() {
         </div>
 
         <div>
-          <Label htmlFor="dueTime" className="text-base font-semibold">
+          <Label htmlFor="dueTime">
             Due Time <span className="text-zinc-500 text-sm">(Optional)</span>
           </Label>
           <Input

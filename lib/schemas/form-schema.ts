@@ -161,15 +161,67 @@ export const formDataSchema = z
   )
   .refine(
     (data) => {
-      // If requestType is Mockup, must have at least one product
-      if (data.requestType === 'Mockup') {
+      // If requestType is Mockup or Proofs, must have at least one product
+      if (data.requestType === 'Mockup' || data.requestType === 'Proofs') {
         return data.products.length > 0;
       }
       return true;
     },
     {
-      message: 'At least one product is required for Mockup requests',
+      message: 'At least one product is required',
       path: ['products'],
+    }
+  )
+  .refine(
+    (data) => {
+      // If requestType is Mockup, mockupType is required
+      if (data.requestType === 'Mockup') {
+        return data.mockupType && data.mockupType.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: 'Mockup type is required',
+      path: ['mockupType'],
+    }
+  )
+  .refine(
+    (data) => {
+      // If requestType is PPTX, pptxType is required
+      if (data.requestType === 'PPTX') {
+        return data.pptxType && data.pptxType.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: 'PPTX type is required',
+      path: ['pptxType'],
+    }
+  )
+  .refine(
+    (data) => {
+      // If requestType is Proofs, proofType is required
+      if (data.requestType === 'Proofs') {
+        return data.proofType && data.proofType.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: 'Proof type is required',
+      path: ['proofType'],
+    }
+  )
+  .refine(
+    (data) => {
+      // If requestType is Sneak Peek, sneakPeekOptions is required
+      if (data.requestType === 'Sneak Peek') {
+        return data.sneakPeekOptions && data.sneakPeekOptions.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: 'Sneak peek options are required',
+      path: ['sneakPeekOptions'],
     }
   )
   .refine(
