@@ -7,8 +7,8 @@
 
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,8 +35,8 @@ interface Submission {
   requestorEmail: string;
   requestorName?: string;
   pertinentInformation?: string;
-  products?: any[];
-  websiteLinks?: any[];
+  products?: Array<{ name: string; quantity?: number; sku?: string }>;
+  websiteLinks?: Array<{ url: string; description?: string }>;
   labels?: string[];
   collaborators?: string[];
   status: string;
@@ -65,7 +65,7 @@ function StatusBadge({ status }: { status: string }) {
     },
     processing: {
       icon: Clock,
-      className: 'bg-blue-100 text-blue-800',
+      className: 'bg-primary/10 text-midnight',
       label: 'Processing',
     },
     error: {
@@ -75,11 +75,14 @@ function StatusBadge({ status }: { status: string }) {
     },
   };
 
-  const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.processing;
+  const config =
+    statusConfig[status as keyof typeof statusConfig] || statusConfig.processing;
   const Icon = config.icon;
 
   return (
-    <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium w-full ${config.className}`}>
+    <div
+      className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium w-full ${config.className}`}
+    >
       <Icon className="w-4 h-4" />
       {config.label}
     </div>
@@ -88,7 +91,6 @@ function StatusBadge({ status }: { status: string }) {
 
 export default function SubmissionDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const submissionId = params.submissionId as string;
 
   const [submission, setSubmission] = useState<Submission | null>(null);
@@ -97,7 +99,7 @@ export default function SubmissionDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch submission data
-  const fetchSubmission = async () => {
+  const fetchSubmission = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -116,7 +118,7 @@ export default function SubmissionDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [submissionId]);
 
   // Retry failed submission
   const handleRetry = async () => {
@@ -152,7 +154,7 @@ export default function SubmissionDetailPage() {
   // Load submission on mount
   useEffect(() => {
     fetchSubmission();
-  }, [submissionId]);
+  }, [fetchSubmission]);
 
   if (loading) {
     return (
@@ -262,7 +264,9 @@ export default function SubmissionDetailPage() {
               </div>
               <div>
                 <dt className="text-sm font-medium text-zinc-600">Region</dt>
-                <dd className="text-sm text-zinc-900 mt-1">{submission.region || 'N/A'}</dd>
+                <dd className="text-sm text-zinc-900 mt-1">
+                  {submission.region || 'N/A'}
+                </dd>
               </div>
               {submission.dueDate && (
                 <div>
@@ -275,7 +279,9 @@ export default function SubmissionDetailPage() {
               {submission.projectValue && (
                 <div>
                   <dt className="text-sm font-medium text-zinc-600">Project Value</dt>
-                  <dd className="text-sm text-zinc-900 mt-1">{submission.projectValue}</dd>
+                  <dd className="text-sm text-zinc-900 mt-1">
+                    {submission.projectValue}
+                  </dd>
                 </div>
               )}
               {submission.billable && (
@@ -294,7 +300,7 @@ export default function SubmissionDetailPage() {
                   {submission.labels.map((label) => (
                     <span
                       key={label}
-                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-midnight"
                     >
                       {label}
                     </span>
@@ -335,10 +341,7 @@ export default function SubmissionDetailPage() {
               <h2 className="text-xl font-semibold text-zinc-900 mb-4">Products</h2>
               <div className="space-y-4">
                 {submission.products.map((product, index) => (
-                  <div
-                    key={product.id}
-                    className="border border-zinc-200 rounded-lg p-4"
-                  >
+                  <div key={product.id} className="border border-zinc-200 rounded-lg p-4">
                     <h3 className="font-medium text-zinc-900 mb-3">
                       Product {index + 1}: {product.name}
                     </h3>
@@ -381,7 +384,7 @@ export default function SubmissionDetailPage() {
                               href={product.link}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
+                              className="text-primary hover:underline"
                             >
                               {product.link}
                             </a>
@@ -415,7 +418,7 @@ export default function SubmissionDetailPage() {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline"
+                      className="text-sm text-primary hover:underline"
                     >
                       {link.url}
                     </a>
@@ -445,7 +448,9 @@ export default function SubmissionDetailPage() {
                     <p className="text-xs text-red-700">{submission.errorDetails.step}</p>
 
                     <p className="text-xs font-medium text-red-800 mt-2">Retry Count</p>
-                    <p className="text-xs text-red-700">{submission.errorDetails.retryCount}</p>
+                    <p className="text-xs text-red-700">
+                      {submission.errorDetails.retryCount}
+                    </p>
                   </>
                 )}
               </div>
@@ -463,7 +468,7 @@ export default function SubmissionDetailPage() {
                   href={submission.asanaTaskUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                  className="flex items-center gap-2 text-sm text-primary hover:text-midnight"
                 >
                   <FileText className="w-4 h-4" />
                   View in Asana
@@ -502,7 +507,7 @@ export default function SubmissionDetailPage() {
                         href={file.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-blue-600 hover:underline truncate block"
+                        className="text-xs text-primary hover:underline truncate block"
                       >
                         {file.name}
                       </a>
@@ -515,9 +520,7 @@ export default function SubmissionDetailPage() {
 
           {/* Submission Info */}
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">
-              Submission Info
-            </h2>
+            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Submission Info</h2>
             <dl className="space-y-3 text-sm">
               <div>
                 <dt className="text-zinc-600">Submission ID</dt>

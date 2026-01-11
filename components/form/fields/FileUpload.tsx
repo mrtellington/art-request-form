@@ -59,7 +59,7 @@ export function FileUpload({ files, onFilesChange }: FileUploadProps) {
         />
         <label
           htmlFor="file-upload"
-          className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-300 rounded-lg p-8 cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
+          className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-300 rounded-lg p-8 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
         >
           <Upload className="h-10 w-10 text-zinc-400 mb-3" />
           <p className="text-sm font-medium text-zinc-700 mb-1">

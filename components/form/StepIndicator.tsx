@@ -39,7 +39,7 @@ export function StepIndicator({
               {!isLast && (
                 <div
                   className={`absolute top-4 left-1/2 w-full h-0.5 ${
-                    isPast ? 'bg-blue-600' : 'bg-zinc-200'
+                    isPast ? 'bg-primary' : 'bg-zinc-200'
                   }`}
                   aria-hidden="true"
                 />
@@ -57,11 +57,11 @@ export function StepIndicator({
                 <span
                   className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-colors ${
                     isCurrent
-                      ? 'border-blue-600 bg-blue-600 text-white'
+                      ? 'border-primary bg-primary text-white'
                       : isCompleted || isPast
-                        ? 'border-blue-600 bg-blue-600 text-white'
+                        ? 'border-primary bg-primary text-white'
                         : 'border-zinc-300 bg-white text-zinc-500'
-                  } ${canClick ? 'hover:border-blue-700 hover:bg-blue-700' : ''}`}
+                  } ${canClick ? 'hover:border-primary/90 hover:bg-primary/90' : ''}`}
                 >
                   {isCompleted || isPast ? (
                     <Check className="h-5 w-5" aria-hidden="true" />
@@ -74,7 +74,7 @@ export function StepIndicator({
                 <span
                   className={`mt-2 text-xs font-medium text-center whitespace-nowrap ${
                     isCurrent
-                      ? 'text-blue-600'
+                      ? 'text-primary'
                       : isPast
                         ? 'text-zinc-700'
                         : 'text-zinc-500'

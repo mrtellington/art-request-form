@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, FileEdit, AlertCircle, CheckCircle, Clock, RefreshCw } from 'lucide-react';
+import {
+  Search,
+  FileEdit,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  RefreshCw,
+} from 'lucide-react';
 import Link from 'next/link';
 
 interface Submission {
@@ -51,7 +58,7 @@ function StatusBadge({ status }: { status: string }) {
     },
     processing: {
       icon: Clock,
-      className: 'bg-blue-100 text-blue-800 border-blue-200',
+      className: 'bg-primary/10 text-midnight border-primary/20',
       label: 'Processing',
     },
     error: {
@@ -88,7 +95,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch submissions from API
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -109,7 +116,8 @@ export default function AdminDashboard() {
       setFilteredSubmissions(data.submissions || []);
     } catch (err) {
       console.error('Error fetching submissions:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load submissions';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to load submissions';
       setError(errorMessage);
       toast.error('Failed to load submissions', {
         description: errorMessage,
@@ -117,12 +125,12 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
 
   // Load submissions on mount and when filter changes
   useEffect(() => {
     fetchSubmissions();
-  }, [statusFilter]);
+  }, [fetchSubmissions]);
 
   // Apply search filter
   useEffect(() => {
@@ -150,9 +158,7 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-zinc-900 mb-2">
               Art Request Submissions
             </h1>
-            <p className="text-zinc-600">
-              View and manage all art request submissions
-            </p>
+            <p className="text-zinc-600">View and manage all art request submissions</p>
           </div>
           <Button
             onClick={fetchSubmissions}

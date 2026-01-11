@@ -90,7 +90,7 @@ export function RequestTypeStep() {
             onClick={() => handleSelect(value)}
             className={`relative flex items-start gap-4 p-4 rounded-lg border-2 transition-all text-left ${
               selectedType === value
-                ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-600 ring-opacity-50'
+                ? 'border-primary bg-primary/5 ring-2 ring-primary ring-opacity-50'
                 : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
             }`}
           >
@@ -98,7 +98,7 @@ export function RequestTypeStep() {
             <div
               className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
                 selectedType === value
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-primary text-white'
                   : 'bg-zinc-100 text-zinc-600'
               }`}
             >
@@ -107,13 +107,13 @@ export function RequestTypeStep() {
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-zinc-900">{label}</div>
+              <div className="font-semibold text-midnight">{label}</div>
               <div className="text-sm text-zinc-600 mt-0.5">{description}</div>
             </div>
 
             {/* Selected Indicator */}
             {selectedType === value && (
-              <div className="absolute top-3 right-3 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
+              <div className="absolute top-3 right-3 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                 <svg
                   className="w-3 h-3 text-white"
                   fill="currentColor"

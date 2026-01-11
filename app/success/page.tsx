@@ -54,7 +54,7 @@ function SuccessContent() {
                   className="flex items-center justify-between p-4 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-blue-600" />
+                    <FileText className="w-5 h-5 text-primary" />
                     <div>
                       <p className="font-medium text-zinc-900">View in Asana</p>
                       <p className="text-sm text-zinc-600">
@@ -76,9 +76,7 @@ function SuccessContent() {
                   <div className="flex items-center gap-3">
                     <FolderOpen className="w-5 h-5 text-green-600" />
                     <div>
-                      <p className="font-medium text-zinc-900">
-                        View in Google Drive
-                      </p>
+                      <p className="font-medium text-zinc-900">View in Google Drive</p>
                       <p className="text-sm text-zinc-600">
                         Access attachments and project files
                       </p>

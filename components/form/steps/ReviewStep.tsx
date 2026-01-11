@@ -225,7 +225,7 @@ export function ReviewStep() {
                             href={product.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
+                            className="text-primary hover:underline"
                           >
                             {product.link}
                           </a>
@@ -315,7 +315,7 @@ export function ReviewStep() {
                   {formData.labels.map((label) => (
                     <span
                       key={label}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-midnight"
                     >
                       {label}
                     </span>
@@ -401,7 +401,7 @@ export function ReviewStep() {
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:underline truncate"
+                        className="text-sm text-primary hover:underline truncate"
                       >
                         {link.url}
                       </a>
@@ -415,7 +415,7 @@ export function ReviewStep() {
       )}
 
       {/* What Happens Next */}
-      <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded text-sm">
+      <div className="bg-primary/5 border border-primary/20 text-midnight px-4 py-3 rounded text-sm">
         <p className="font-medium">What Happens Next?</p>
         <p className="mt-1">
           Upon submission, we will automatically create the Google Drive folder (if

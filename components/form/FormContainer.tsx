@@ -102,7 +102,15 @@ export function FormContainer({
         nextStep();
       }
     }
-  }, [currentStep.id, currentStepIndex, isLastStep, nextStep, trigger, handleSubmit]);
+  }, [
+    currentStep.id,
+    currentStepIndex,
+    isLastStep,
+    nextStep,
+    trigger,
+    handleSubmit,
+    handleFormSubmit,
+  ]);
 
   // Handle previous button
   const handlePrevious = useCallback(() => {
@@ -185,7 +193,7 @@ export function FormContainer({
 
           {/* Step Header */}
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-zinc-900">{currentStep.label}</h2>
+            <h2 className="text-2xl font-bold text-midnight">{currentStep.label}</h2>
             {currentStep.description && (
               <p className="text-zinc-600 mt-1">{currentStep.description}</p>
             )}

@@ -1,13 +1,26 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-figtree);
+
+  /* Whitestone Brand Colors */
+  --color-midnight: #0e1237;
+  --color-hudson: #2f6e87;
+  --color-verdigris: #51b3bd;
+  --color-sea-salt: #f7f7f7;
+  --color-tart: #df636e;
+
+  /* Whitestone Typography Scale */
+  --font-size-h1: 3rem;
+  --font-size-h2: 2.25rem;
+  --font-size-h3: 1.875rem;
+  --font-size-h4: 1.5rem;
+  --font-size-h5: 1.25rem;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,71 +61,73 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Whitestone Brand Color System */
+  --background: oklch(0.97 0 0); /* Sea Salt */
+  --foreground: oklch(0.12 0.08 270); /* Midnight */
+  --card: oklch(1 0 0); /* White */
+  --card-foreground: oklch(0.12 0.08 270); /* Midnight */
+  --popover: oklch(1 0 0); /* White */
+  --popover-foreground: oklch(0.12 0.08 270); /* Midnight */
+  --primary: oklch(0.48 0.08 225); /* Hudson */
+  --primary-foreground: oklch(1 0 0); /* White */
+  --secondary: oklch(0.68 0.06 200); /* Verdigris */
+  --secondary-foreground: oklch(1 0 0); /* White */
+  --muted: oklch(0.94 0 0); /* Light gray */
+  --muted-foreground: oklch(0.556 0 0); /* Gray for placeholders */
+  --accent: oklch(0.68 0.06 200); /* Verdigris for interactive hover */
+  --accent-foreground: oklch(1 0 0); /* White */
+  --destructive: oklch(0.6 0.14 15); /* Tart for errors/destructive */
+  --border: oklch(0.88 0 0); /* Light border */
+  --input: oklch(0.88 0 0); /* Input border */
+  --ring: oklch(0.68 0.06 200); /* Verdigris for focus rings */
+  --chart-1: oklch(0.48 0.08 225); /* Hudson */
+  --chart-2: oklch(0.68 0.06 200); /* Verdigris */
+  --chart-3: oklch(0.6 0.14 15); /* Tart */
+  --chart-4: oklch(0.12 0.08 270); /* Midnight */
+  --chart-5: oklch(0.97 0 0); /* Sea Salt */
+  --sidebar: oklch(1 0 0); /* White */
+  --sidebar-foreground: oklch(0.12 0.08 270); /* Midnight */
+  --sidebar-primary: oklch(0.48 0.08 225); /* Hudson */
+  --sidebar-primary-foreground: oklch(1 0 0); /* White */
+  --sidebar-accent: oklch(0.68 0.06 200); /* Verdigris */
+  --sidebar-accent-foreground: oklch(1 0 0); /* White */
+  --sidebar-border: oklch(0.88 0 0); /* Light border */
+  --sidebar-ring: oklch(0.68 0.06 200); /* Verdigris */
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Whitestone Dark Mode */
+  --background: oklch(0.12 0.08 270); /* Midnight */
+  --foreground: oklch(0.97 0 0); /* Sea Salt */
+  --card: oklch(0.18 0.06 270); /* Slightly lighter than Midnight */
+  --card-foreground: oklch(0.97 0 0); /* Sea Salt */
+  --popover: oklch(0.18 0.06 270); /* Slightly lighter than Midnight */
+  --popover-foreground: oklch(0.97 0 0); /* Sea Salt */
+  --primary: oklch(0.68 0.06 200); /* Verdigris (lighter in dark mode) */
+  --primary-foreground: oklch(0.12 0.08 270); /* Midnight */
+  --secondary: oklch(0.48 0.08 225); /* Hudson */
+  --secondary-foreground: oklch(1 0 0); /* White */
+  --muted: oklch(0.22 0.04 270); /* Muted dark */
+  --muted-foreground: oklch(0.708 0 0); /* Gray for placeholders */
+  --accent: oklch(0.68 0.06 200); /* Verdigris for interactive hover */
+  --accent-foreground: oklch(1 0 0); /* White */
+  --destructive: oklch(0.6 0.14 15); /* Tart for errors/destructive */
+  --border: oklch(1 0 0 / 15%); /* Subtle border */
+  --input: oklch(1 0 0 / 20%); /* Input border */
+  --ring: oklch(0.68 0.06 200); /* Verdigris focus ring */
+  --chart-1: oklch(0.68 0.06 200); /* Verdigris */
+  --chart-2: oklch(0.48 0.08 225); /* Hudson */
+  --chart-3: oklch(0.6 0.14 15); /* Tart */
+  --chart-4: oklch(0.97 0 0); /* Sea Salt */
+  --chart-5: oklch(0.75 0.06 200); /* Light Verdigris */
+  --sidebar: oklch(0.12 0.08 270); /* Midnight */
+  --sidebar-foreground: oklch(0.97 0 0); /* Sea Salt */
+  --sidebar-primary: oklch(0.68 0.06 200); /* Verdigris */
+  --sidebar-primary-foreground: oklch(0.12 0.08 270); /* Midnight */
+  --sidebar-accent: oklch(0.48 0.08 225); /* Hudson */
+  --sidebar-accent-foreground: oklch(1 0 0); /* White */
+  --sidebar-border: oklch(1 0 0 / 15%); /* Subtle border */
+  --sidebar-ring: oklch(0.68 0.06 200); /* Verdigris */
 }
 
 @layer base {
@@ -121,5 +136,34 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Whitestone Typography Scale */
+  h1 {
+    @apply text-[3rem] font-extrabold leading-[1.2] tracking-[-0.02em] text-midnight;
+  }
+
+  h2 {
+    @apply text-[2.25rem] font-extrabold leading-[1.3] tracking-[-0.01em] text-midnight;
+  }
+
+  h3 {
+    @apply text-[1.875rem] font-semibold leading-[1.4] text-midnight;
+  }
+
+  h4 {
+    @apply text-[1.5rem] font-semibold leading-[1.4] tracking-[0.1em] text-midnight;
+  }
+
+  h5 {
+    @apply text-[1.25rem] font-semibold leading-[1.5] text-midnight;
+  }
+
+  p {
+    @apply text-base font-normal leading-[1.6];
+  }
+
+  small {
+    @apply text-sm font-normal leading-[1.5];
   }
 }

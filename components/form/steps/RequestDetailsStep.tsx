@@ -149,7 +149,7 @@ export function RequestDetailsStep() {
 
       case 'Proofs':
         return (
-          <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded">
+          <div className="bg-primary/5 border border-primary/20 text-midnight px-4 py-3 rounded">
             <p className="text-sm">
               You will select the Proof Type in the Project Info step. Continue to the
               next step.
@@ -179,7 +179,7 @@ export function RequestDetailsStep() {
 
       case 'Creative Design Services':
         return (
-          <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded">
+          <div className="bg-primary/5 border border-primary/20 text-midnight px-4 py-3 rounded">
             <p className="text-sm">
               No additional details required for Creative Design Services. Continue to the
               next step.
