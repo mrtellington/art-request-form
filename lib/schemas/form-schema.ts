@@ -90,9 +90,36 @@ export const fileAttachmentSchema = z.object({
 });
 
 /**
+ * Slide Product Schema (for Rise & Shine)
+ */
+export const slideProductSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1, 'Product title is required'),
+  link: z.string().url('Invalid URL').optional().or(z.literal('')),
+});
+
+/**
+ * Presentation Slide Schema (for Rise & Shine)
+ */
+export const presentationSlideSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1, 'Slide title is required'),
+  products: z.array(slideProductSchema),
+});
+
+/**
  * Email validation
  */
 const emailSchema = z.string().email('Invalid email address');
+
+/**
+ * Helper to create a required field that rejects null/empty values
+ */
+const requiredString = (message: string) =>
+  z
+    .string()
+    .nullable()
+    .refine((val) => val !== null && val.trim().length > 0, { message });
 
 /**
  * Main Form Data Schema
@@ -100,27 +127,43 @@ const emailSchema = z.string().email('Invalid email address');
  */
 export const formDataSchema = z
   .object({
-    // Basic Information
-    requestType: requestTypeSchema.nullable(),
-    requestorName: z.string().min(1, 'Name is required').nullable(),
-    requestorEmail: emailSchema.nullable(),
-    region: regionSchema.nullable(),
-    requestTitle: z.string().min(1, 'Request title is required').nullable(),
+    // Basic Information - these are always required
+    requestType: requestTypeSchema.nullable().refine((val) => val !== null, {
+      message: 'Request type is required',
+    }),
+    requestorName: requiredString('Requestor name is required'),
+    requestorEmail: z
+      .string()
+      .nullable()
+      .refine((val) => val !== null && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+        message: 'Valid email is required',
+      }),
+    region: regionSchema.nullable().refine((val) => val !== null, {
+      message: 'Region is required',
+    }),
+    requestTitle: requiredString('Request title is required'),
 
     // Client Information
-    clientName: z.string().min(1, 'Client name is required').nullable(),
+    clientName: requiredString('Client name is required'),
     clientExists: z.boolean(),
     clientId: z.string().optional(),
 
     // Due Date/Time
-    dueDate: z.string().nullable(), // ISO 8601 date
+    dueDate: z
+      .string()
+      .nullable()
+      .refine((val) => val !== null && val.length > 0, {
+        message: 'Due date is required',
+      }),
     dueTime: z.string().optional(), // HH:mm format
 
-    // Project Metadata
+    // Project Metadata - conditionally required (handled by refines below)
     projectNumber: z.string().optional(),
     projectValue: projectValueSchema.nullable(),
     billable: billableSchema.nullable(),
-    clientType: clientTypeSchema.nullable(),
+    clientType: clientTypeSchema.nullable().refine((val) => val !== null, {
+      message: 'Client type is required',
+    }),
 
     // Collaborators
     addCollaborators: z.boolean(),
@@ -140,6 +183,9 @@ export const formDataSchema = z
     riseAndShineLevel: riseAndShineLevelSchema.optional(),
     proofType: z.string().optional(),
     sneakPeekOptions: z.string().optional(),
+
+    // Rise & Shine Presentation Structure
+    slides: z.array(presentationSlideSchema),
 
     // Repeatable Sections
     products: z.array(productSchema),
@@ -248,6 +294,39 @@ export const formDataSchema = z
     {
       message: 'Rise & Shine level is required for Rise & Shine requests',
       path: ['riseAndShineLevel'],
+    }
+  )
+  .refine(
+    (data) => {
+      // Project Value is required for Mockup, PPTX, Rise & Shine
+      if (
+        data.requestType === 'Mockup' ||
+        data.requestType === 'PPTX' ||
+        data.requestType === 'Rise & Shine'
+      ) {
+        return data.projectValue !== null && data.projectValue !== undefined;
+      }
+      return true;
+    },
+    {
+      message: 'Project value is required',
+      path: ['projectValue'],
+    }
+  )
+  .refine(
+    (data) => {
+      // Billable is required for Creative Design Services, Mockup
+      if (
+        data.requestType === 'Creative Design Services' ||
+        data.requestType === 'Mockup'
+      ) {
+        return data.billable !== null && data.billable !== undefined;
+      }
+      return true;
+    },
+    {
+      message: 'Billable status is required',
+      path: ['billable'],
     }
   );
 

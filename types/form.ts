@@ -66,6 +66,24 @@ export interface FileAttachment {
 }
 
 /**
+ * Slide Product interface (for Rise & Shine Presentation Structure)
+ */
+export interface SlideProduct {
+  id: string;
+  title: string;
+  link?: string;
+}
+
+/**
+ * Presentation Slide interface (for Rise & Shine)
+ */
+export interface PresentationSlide {
+  id: string;
+  title: string;
+  products: SlideProduct[];
+}
+
+/**
  * Main Form Data interface
  * All fields from the Cognito form
  */
@@ -106,10 +124,13 @@ export interface FormData {
   mockupType?: string;
   pptxType?: string;
   numberOfSlides?: number;
-  presentationStructure?: string;
+  presentationStructure?: string; // For regular PPTX (text description)
   riseAndShineLevel?: RiseAndShineLevel;
   proofType?: string;
   sneakPeekOptions?: string;
+
+  // Rise & Shine Presentation Structure (slides with products)
+  slides: PresentationSlide[];
 
   // Repeatable Sections (OBJECT ARRAYS - not parallel arrays!)
   products: Product[];
@@ -136,6 +157,7 @@ export const initialFormData: FormData = {
   addCollaborators: false,
   collaborators: [],
   labels: [],
+  slides: [],
   products: [],
   websiteLinks: [],
   attachments: [],

@@ -50,12 +50,6 @@ const RichTextEditor = dynamic(
 
 const labels: FormLabel[] = ['Call Needed', 'Rush', 'Needs Creative'];
 const clientTypes: ClientType[] = ['Prospect', 'Client', 'Enterprise'];
-const proofTypes = [
-  'Whitestone Letterhead',
-  'Tech Pack (List Specs in Pertinent Information)',
-  'Supplier Template',
-  'No Template (Use for Printed Materials)',
-];
 
 const emptyLink: Omit<WebsiteLink, 'id'> = {
   type: '',
@@ -80,7 +74,6 @@ export function AdditionalInfoStep() {
   const projectValue = watch('projectValue');
   const billable = watch('billable');
   const clientType = watch('clientType');
-  const proofType = watch('proofType');
   const selectedLabels = watch('labels') || [];
   const addCollaborators = watch('addCollaborators') || false;
   const collaborators = watch('collaborators') || [];
@@ -125,60 +118,68 @@ export function AdditionalInfoStep() {
     <div className="space-y-8">
       {/* Project Metadata Section */}
       <div className="space-y-6">
-        {/* Project Value */}
-        <div>
-          <Label htmlFor="projectValue">
-            Project Value <span className="text-red-500">*</span>
-          </Label>
-          <p className="text-sm text-zinc-600 mt-1 mb-3">Estimated project value range</p>
-          <Select
-            value={projectValue || undefined}
-            onValueChange={(value) =>
-              setValue('projectValue', value as ProjectValue, {
-                shouldValidate: true,
-              })
-            }
-          >
-            <SelectTrigger id="projectValue">
-              <SelectValue placeholder="Select project value" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="<$50k">Less than $50k</SelectItem>
-              <SelectItem value="$50k-$250k">$50k - $250k</SelectItem>
-              <SelectItem value=">$250k">Greater than $250k</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.projectValue && (
-            <p className="text-sm text-red-600 mt-2">{errors.projectValue.message}</p>
-          )}
-        </div>
+        {/* Project Value - Only for Mockup, PPTX, Rise & Shine */}
+        {(requestType === 'Mockup' ||
+          requestType === 'PPTX' ||
+          requestType === 'Rise & Shine') && (
+          <div>
+            <Label htmlFor="projectValue">
+              Project Value <span className="text-red-500">*</span>
+            </Label>
+            <p className="text-sm text-zinc-600 mt-1 mb-3">
+              Estimated project value range
+            </p>
+            <Select
+              value={projectValue || undefined}
+              onValueChange={(value) =>
+                setValue('projectValue', value as ProjectValue, {
+                  shouldValidate: true,
+                })
+              }
+            >
+              <SelectTrigger id="projectValue">
+                <SelectValue placeholder="Select project value" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="<$50k">Less than $50k</SelectItem>
+                <SelectItem value="$50k-$250k">$50k - $250k</SelectItem>
+                <SelectItem value=">$250k">Greater than $250k</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.projectValue && (
+              <p className="text-sm text-red-600 mt-2">{errors.projectValue.message}</p>
+            )}
+          </div>
+        )}
 
-        {/* Billable */}
-        <div>
-          <Label htmlFor="billable">
-            Billable <span className="text-red-500">*</span>
-          </Label>
-          <p className="text-sm text-zinc-600 mt-1 mb-3">
-            Is this project billable to the client?
-          </p>
-          <Select
-            value={billable || undefined}
-            onValueChange={(value) =>
-              setValue('billable', value as Billable, { shouldValidate: true })
-            }
-          >
-            <SelectTrigger id="billable">
-              <SelectValue placeholder="Select billable status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Yes">Yes</SelectItem>
-              <SelectItem value="No">No</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.billable && (
-            <p className="text-sm text-red-600 mt-2">{errors.billable.message}</p>
-          )}
-        </div>
+        {/* Billable - Only for Creative Design Services, Mockup */}
+        {(requestType === 'Creative Design Services' || requestType === 'Mockup') && (
+          <div>
+            <Label htmlFor="billable">
+              Billable <span className="text-red-500">*</span>
+            </Label>
+            <p className="text-sm text-zinc-600 mt-1 mb-3">
+              Is this project billable to the client?
+            </p>
+            <Select
+              value={billable || undefined}
+              onValueChange={(value) =>
+                setValue('billable', value as Billable, { shouldValidate: true })
+              }
+            >
+              <SelectTrigger id="billable">
+                <SelectValue placeholder="Select billable status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Yes">Yes</SelectItem>
+                <SelectItem value="No">No</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.billable && (
+              <p className="text-sm text-red-600 mt-2">{errors.billable.message}</p>
+            )}
+          </div>
+        )}
 
         {/* Client Type */}
         <div>
@@ -209,38 +210,6 @@ export function AdditionalInfoStep() {
             <p className="text-sm text-red-600 mt-2">{errors.clientType.message}</p>
           )}
         </div>
-
-        {/* Proof Type - Only for Proofs requests */}
-        {requestType === 'Proofs' && (
-          <div>
-            <Label htmlFor="proofType">
-              Proof Type <span className="text-red-500">*</span>
-            </Label>
-            <p className="text-sm text-zinc-600 mt-1 mb-3">
-              Select the type of proof needed
-            </p>
-            <Select
-              value={proofType || undefined}
-              onValueChange={(value) =>
-                setValue('proofType', value, { shouldValidate: true })
-              }
-            >
-              <SelectTrigger id="proofType">
-                <SelectValue placeholder="Select proof type" />
-              </SelectTrigger>
-              <SelectContent>
-                {proofTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.proofType && (
-              <p className="text-sm text-red-600 mt-2">{errors.proofType.message}</p>
-            )}
-          </div>
-        )}
 
         {/* Labels */}
         <div>

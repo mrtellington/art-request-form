@@ -55,8 +55,15 @@ export async function getAsanaUsers(): Promise<
 
   try {
     const workspaceId = process.env.ASANA_WORKSPACE_ID;
+    const token = process.env.ASANA_ACCESS_TOKEN;
+
     if (!workspaceId) {
-      console.warn('ASANA_WORKSPACE_ID not set, cannot fetch users');
+      console.error('ASANA_WORKSPACE_ID not set, cannot fetch users');
+      return [];
+    }
+
+    if (!token) {
+      console.error('ASANA_ACCESS_TOKEN not set, cannot fetch users');
       return [];
     }
 
@@ -66,7 +73,11 @@ export async function getAsanaUsers(): Promise<
     );
 
     if (!response.ok) {
-      console.error('Failed to fetch Asana users');
+      const errorText = await response.text();
+      console.error(
+        `Failed to fetch Asana users: ${response.status} ${response.statusText}`,
+        errorText
+      );
       return [];
     }
 

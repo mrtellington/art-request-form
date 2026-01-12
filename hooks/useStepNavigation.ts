@@ -42,7 +42,6 @@ export function useStepNavigation(formData: Partial<FormData>): UseStepNavigatio
       {
         id: 'requestType',
         label: 'Request Type',
-        description: 'What type of request is this?',
       },
       {
         id: 'projectDetails',
@@ -51,16 +50,8 @@ export function useStepNavigation(formData: Partial<FormData>): UseStepNavigatio
       },
     ];
 
-    // Add Request Details step for all types except Proofs
-    if (formData.requestType !== 'Proofs') {
-      baseSteps.push({
-        id: 'requestDetails',
-        label: 'Request Details',
-        description: 'Specific details for your request type',
-      });
-    }
-
-    // Add Product Details step for Mockup and Proofs requests
+    // Product Details step only for Mockup and Proofs
+    // (Type-specific fields are now consolidated into Project Details step)
     if (formData.requestType === 'Mockup' || formData.requestType === 'Proofs') {
       baseSteps.push({
         id: 'products',

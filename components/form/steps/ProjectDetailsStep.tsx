@@ -14,7 +14,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { FormData, Region } from '@/types/form';
+import { FormData, Region, RiseAndShineLevel } from '@/types/form';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import {
@@ -24,7 +25,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CheckCircle, Loader2, Search } from 'lucide-react';
+import { CheckCircle, Loader2, Search, ExternalLink } from 'lucide-react';
+import {
+  RISE_AND_SHINE_LEVELS,
+  ASANA_BOARD_URL,
+  FOLLOW_TEMPLATE_URL,
+} from '@/lib/constants/rise-and-shine';
+import {
+  MOCKUP_TYPE_OPTIONS,
+  PPTX_TYPE_OPTIONS,
+  PROOF_TYPE_OPTIONS,
+} from '@/lib/constants/type-options';
+import { PresentationStructure } from '../fields/PresentationStructure';
 
 interface ClientResult {
   id: string;
@@ -47,7 +59,8 @@ export function ProjectDetailsStep() {
     formState: { errors },
   } = useFormContext<FormData>();
 
-  // Client search state
+  // Watch form values
+  const requestType = watch('requestType');
   const clientName = watch('clientName');
   const clientExists = watch('clientExists');
   const region = watch('region');
@@ -351,34 +364,178 @@ export function ProjectDetailsStep() {
         )}
       </div>
 
-      {/* Project Number */}
-      <div>
-        <Label htmlFor="projectNumber">
-          Project# <span className="text-zinc-500 text-sm">(Optional)</span>
-        </Label>
-        <p className="text-sm text-zinc-600 mt-1 mb-3">
-          commonsku project reference number (numbers only)
-        </p>
-        <Input
-          id="projectNumber"
-          tabIndex={6}
-          {...register('projectNumber', {
-            pattern: {
-              value: /^[0-9]*$/,
-              message: 'Project# must contain only numbers',
-            },
-          })}
-          placeholder="e.g., 12345"
-          inputMode="numeric"
-          onChange={(e) => {
-            const value = e.target.value.replace(/[^0-9]/g, '');
-            setValue('projectNumber', value);
-          }}
+      {/* Type-Specific Fields - Conditionally rendered based on requestType */}
+      {requestType === 'Mockup' && (
+        <div>
+          <Label htmlFor="mockupType">
+            Mockup Type <span className="text-red-500">*</span>
+          </Label>
+          <Select
+            value={watch('mockupType') || undefined}
+            onValueChange={(value) =>
+              setValue('mockupType', value, { shouldValidate: true })
+            }
+          >
+            <SelectTrigger id="mockupType" className="mt-2">
+              <SelectValue placeholder="Select mockup type" />
+            </SelectTrigger>
+            <SelectContent>
+              {MOCKUP_TYPE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.mockupType && (
+            <p className="text-sm text-red-600 mt-2">{errors.mockupType.message}</p>
+          )}
+        </div>
+      )}
+
+      {requestType === 'PPTX' && (
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="pptxType">
+              PPTX Type <span className="text-red-500">*</span>
+            </Label>
+            <Select
+              value={watch('pptxType') || undefined}
+              onValueChange={(value) =>
+                setValue('pptxType', value, { shouldValidate: true })
+              }
+            >
+              <SelectTrigger id="pptxType" className="mt-2">
+                <SelectValue placeholder="Select PPTX type" />
+              </SelectTrigger>
+              <SelectContent>
+                {PPTX_TYPE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.pptxType && (
+              <p className="text-sm text-red-600 mt-2">{errors.pptxType.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="numberOfSlides">
+              Number of Slides <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="numberOfSlides"
+              type="number"
+              min="1"
+              {...register('numberOfSlides', { valueAsNumber: true })}
+              placeholder="e.g., 10"
+              className="mt-2"
+            />
+            {errors.numberOfSlides && (
+              <p className="text-sm text-red-600 mt-2">{errors.numberOfSlides.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="presentationStructure">Presentation Structure</Label>
+            <Textarea
+              id="presentationStructure"
+              {...register('presentationStructure')}
+              placeholder="Outline the structure or flow of the presentation..."
+              rows={4}
+              className="mt-2"
+            />
+          </div>
+        </div>
+      )}
+
+      {requestType === 'Proofs' && (
+        <div>
+          <Label htmlFor="proofType">
+            Proof Type <span className="text-red-500">*</span>
+          </Label>
+          <Select
+            value={watch('proofType') || undefined}
+            onValueChange={(value) =>
+              setValue('proofType', value, { shouldValidate: true })
+            }
+          >
+            <SelectTrigger id="proofType" className="mt-2">
+              <SelectValue placeholder="Select proof type" />
+            </SelectTrigger>
+            <SelectContent>
+              {PROOF_TYPE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.proofType && (
+            <p className="text-sm text-red-600 mt-2">{errors.proofType.message}</p>
+          )}
+        </div>
+      )}
+
+      {requestType === 'Sneak Peek' && (
+        <div>
+          <Label htmlFor="sneakPeekOptions">
+            Sneak Peek Options <span className="text-red-500">*</span>
+          </Label>
+          <Textarea
+            id="sneakPeekOptions"
+            {...register('sneakPeekOptions')}
+            placeholder="Describe what you'd like to preview..."
+            rows={4}
+            className="mt-2"
+          />
+          {errors.sneakPeekOptions && (
+            <p className="text-sm text-red-600 mt-2">{errors.sneakPeekOptions.message}</p>
+          )}
+        </div>
+      )}
+
+      {requestType === 'Rise & Shine' && (
+        <RiseAndShineSection
+          watch={watch}
+          setValue={setValue}
+          register={register}
+          errors={errors}
         />
-        {errors.projectNumber && (
-          <p className="text-sm text-red-600 mt-2">{errors.projectNumber.message}</p>
-        )}
-      </div>
+      )}
+
+      {/* Project Number - shown for all types except Sneak Peek */}
+      {requestType !== 'Sneak Peek' && (
+        <div>
+          <Label htmlFor="projectNumber">
+            Project# <span className="text-zinc-500 text-sm">(Optional)</span>
+          </Label>
+          <p className="text-sm text-zinc-600 mt-1 mb-3">
+            commonsku project reference number (numbers only)
+          </p>
+          <Input
+            id="projectNumber"
+            tabIndex={6}
+            {...register('projectNumber', {
+              pattern: {
+                value: /^[0-9]*$/,
+                message: 'Project# must contain only numbers',
+              },
+            })}
+            placeholder="e.g., 12345"
+            inputMode="numeric"
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^0-9]/g, '');
+              setValue('projectNumber', value);
+            }}
+          />
+          {errors.projectNumber && (
+            <p className="text-sm text-red-600 mt-2">{errors.projectNumber.message}</p>
+          )}
+        </div>
+      )}
 
       {/* Due Date and Time */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -415,6 +572,109 @@ export function ProjectDetailsStep() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Rise & Shine Section Component
+ * Shows level-specific messaging and presentation structure
+ */
+interface RiseAndShineSectionProps {
+  watch: ReturnType<typeof useFormContext<FormData>>['watch'];
+  setValue: ReturnType<typeof useFormContext<FormData>>['setValue'];
+  register: ReturnType<typeof useFormContext<FormData>>['register'];
+  errors: ReturnType<typeof useFormContext<FormData>>['formState']['errors'];
+}
+
+function RiseAndShineSection({
+  watch,
+  setValue,
+  register,
+  errors,
+}: RiseAndShineSectionProps) {
+  const riseAndShineLevel = watch('riseAndShineLevel');
+  const levelConfig = riseAndShineLevel ? RISE_AND_SHINE_LEVELS[riseAndShineLevel] : null;
+
+  return (
+    <div className="space-y-6">
+      {/* Rise & Shine Level Dropdown */}
+      <div>
+        <Label htmlFor="riseAndShineLevel">
+          Rise & Shine Level <span className="text-red-500">*</span>
+        </Label>
+        <Select
+          value={riseAndShineLevel || undefined}
+          onValueChange={(value) =>
+            setValue('riseAndShineLevel', value as RiseAndShineLevel, {
+              shouldValidate: true,
+            })
+          }
+        >
+          <SelectTrigger id="riseAndShineLevel" className="mt-2">
+            <SelectValue placeholder="Select level" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Bronze">Bronze</SelectItem>
+            <SelectItem value="Silver">Silver</SelectItem>
+            <SelectItem value="Gold">Gold</SelectItem>
+          </SelectContent>
+        </Select>
+        {errors.riseAndShineLevel && (
+          <p className="text-sm text-red-600 mt-2">{errors.riseAndShineLevel.message}</p>
+        )}
+      </div>
+
+      {/* Level-Specific Messaging */}
+      {levelConfig && (
+        <div className="space-y-4 p-4 bg-sky-50 border border-sky-200 rounded-lg">
+          <h3 className="text-lg font-semibold text-sky-800">{levelConfig.title}:</h3>
+
+          <p className="text-sm text-zinc-700">{levelConfig.description}</p>
+
+          <div className="space-y-2">
+            <p className="text-sm text-zinc-600">
+              Look at the{' '}
+              <a
+                href={ASANA_BOARD_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-600 hover:text-sky-700 underline inline-flex items-center gap-1"
+              >
+                Asana board
+                <ExternalLink className="w-3 h-3" />
+              </a>{' '}
+              to compose a reasonable deadline.
+            </p>
+
+            <p className="text-sm font-medium text-zinc-700">
+              Video Call REQUIRED -{' '}
+              <a
+                href={FOLLOW_TEMPLATE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-600 hover:text-sky-700 underline inline-flex items-center gap-1"
+              >
+                FOLLOW TEMPLATE
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </p>
+          </div>
+
+          <p
+            className={`text-sm font-medium ${levelConfig.eligibilityColor === 'red' ? 'text-red-600' : 'text-sky-600'}`}
+          >
+            {levelConfig.eligibility}
+          </p>
+
+          {levelConfig.extraNote && (
+            <p className="text-sm text-zinc-600 italic">{levelConfig.extraNote}</p>
+          )}
+        </div>
+      )}
+
+      {/* Presentation Structure - Only show when level is selected */}
+      {riseAndShineLevel && <PresentationStructure />}
     </div>
   );
 }
