@@ -128,7 +128,7 @@ export default function SubmissionDetailPage() {
       setRetrying(true);
       setError(null);
 
-      const response = await fetch(`/api/submissions/${submissionId}/retry`, {
+      const response = await fetch(`/api/submissions/${submissionId}`, {
         method: 'POST',
       });
 

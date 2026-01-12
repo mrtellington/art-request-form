@@ -77,6 +77,19 @@ function escapeForXml(text: string): string {
 }
 
 /**
+ * Ensure URL has a protocol (https:// or http://)
+ */
+function ensureProtocol(url: string): string {
+  if (!url) return url;
+  // Check if URL already has a protocol
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+  // Add https:// by default
+  return `https://${url}`;
+}
+
+/**
  * Format products array into HTML list for Asana description
  */
 export function formatProductsHtml(products: Product[]): string {
@@ -90,7 +103,7 @@ export function formatProductsHtml(products: Product[]): string {
 
       if (product.link)
         lines.push(
-          `<li>Link: <a href="${escapeForXml(product.link)}">${escapeForXml(product.link)}</a></li>`
+          `<li>Link: <a href="${escapeForXml(ensureProtocol(product.link))}">${escapeForXml(product.link)}</a></li>`
         );
       if (product.color) lines.push(`<li>Color: ${escapeForXml(product.color)}</li>`);
       if (product.imprintMethod)
@@ -122,7 +135,7 @@ export function formatWebsiteLinksHtml(links: WebsiteLink[]): string {
     links
       .map(
         (link) =>
-          `<li><strong>${escapeForXml(link.type)}:</strong> <a href="${escapeForXml(link.url)}">${escapeForXml(link.url)}</a></li>`
+          `<li><strong>${escapeForXml(link.type)}:</strong> <a href="${escapeForXml(ensureProtocol(link.url))}">${escapeForXml(link.url)}</a></li>`
       )
       .join('') +
     '</ul>'
@@ -391,7 +404,11 @@ export function convertHtmlForAsana(html: string): string {
 
   // Strip all attributes from anchor tags except href
   // TipTap adds class="..." which Asana rejects
-  result = result.replace(/<a\s+[^>]*href="([^"]*)"[^>]*>/gi, '<a href="$1">');
+  // Also ensure URLs have a protocol
+  result = result.replace(/<a\s+[^>]*href="([^"]*)"[^>]*>/gi, (match, url) => {
+    const validUrl = ensureProtocol(url);
+    return `<a href="${validUrl}">`;
+  });
 
   // Remove any unsupported tags but keep their content
   // Asana supports: strong, em, u, s, code, ol, ul, li, a
