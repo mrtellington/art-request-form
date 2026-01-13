@@ -25,7 +25,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CheckCircle, Loader2, Search, ExternalLink } from 'lucide-react';
+import { CheckCircle, Loader2, Search, ExternalLink, AlertCircle } from 'lucide-react';
+import { Tooltip } from '@/components/ui/tooltip-simple';
+import { DatePickerEnhanced } from '@/components/ui/date-picker-enhanced';
 import {
   RISE_AND_SHINE_LEVELS,
   ASANA_BOARD_URL,
@@ -269,16 +271,39 @@ export function ProjectDetailsStep() {
           </div>
 
           {showDropdown && searchResults.length > 0 && !clientExists && (
-            <div className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-              {searchResults.map((client) => (
+            <div className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 rounded-lg shadow-xl animate-in fade-in slide-in-from-top-2 duration-200 max-h-60 overflow-auto">
+              <div className="p-2 bg-zinc-50 border-b border-zinc-200">
+                <p className="text-xs text-zinc-600 font-medium">
+                  {searchResults.length} client{searchResults.length !== 1 ? 's' : ''}{' '}
+                  found
+                </p>
+              </div>
+              {searchResults.map((client, index) => (
                 <button
                   key={client.id}
                   type="button"
                   tabIndex={-1}
                   onClick={() => handleSelectClient(client)}
-                  className="w-full px-4 py-3 text-left hover:bg-zinc-50 focus:bg-zinc-50 focus:outline-none border-b border-zinc-100 last:border-b-0 transition-colors"
+                  className="w-full px-4 py-3 text-left hover:bg-primary/5 focus:bg-primary/5 focus:outline-none border-b border-zinc-100 last:border-b-0 transition-all duration-150 group"
                 >
-                  <span className="font-medium text-zinc-900">{client.name}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-zinc-900 group-hover:text-primary transition-colors">
+                      {client.name}
+                    </span>
+                    <svg
+                      className="w-4 h-4 text-zinc-400 group-hover:text-primary transition-colors"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </div>
                 </button>
               ))}
             </div>
@@ -292,9 +317,16 @@ export function ProjectDetailsStep() {
 
       {/* Client status messages */}
       {!isSearching && clientExists && clientName && clientName.length >= 2 && (
-        <div className="flex items-start gap-3 p-4 rounded-lg border bg-green-50 border-green-200">
+        <div className="flex items-start gap-3 p-4 rounded-lg border bg-green-50 border-green-200 animate-in fade-in slide-in-from-top-2 duration-300">
           <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm font-medium text-green-800">Client Found in commonsku</p>
+          <div>
+            <p className="text-sm font-semibold text-green-800">
+              Client Found in commonsku
+            </p>
+            <p className="text-xs text-green-700 mt-1">
+              This request will be linked to the existing client record
+            </p>
+          </div>
         </div>
       )}
 
@@ -303,10 +335,16 @@ export function ProjectDetailsStep() {
         clientName &&
         clientName.length >= 2 &&
         searchResults.length === 0 && (
-          <div className="flex items-start gap-3 p-4 rounded-lg border bg-amber-50 border-amber-200">
-            <p className="text-sm text-amber-800">
-              Client not found in commonsku. Click next if ok to proceed.
-            </p>
+          <div className="flex items-start gap-3 p-4 rounded-lg border bg-amber-50 border-amber-200 animate-in fade-in slide-in-from-top-2 duration-300">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-amber-800">
+                Client not found in commonsku
+              </p>
+              <p className="text-xs text-amber-700 mt-1">
+                A new client record may be created. You can proceed if this is correct.
+              </p>
+            </div>
           </div>
         )}
 
@@ -346,22 +384,56 @@ export function ProjectDetailsStep() {
 
       {/* Request Title */}
       <div>
-        <Label htmlFor="requestTitle">
-          Request Title <span className="text-red-500">*</span>
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="requestTitle">
+            Request Title <span className="text-red-500">*</span>
+          </Label>
+          {watch('requestTitle') && (
+            <span className="text-xs text-zinc-500">
+              {watch('requestTitle').length} characters
+            </span>
+          )}
+        </div>
         <p className="text-sm text-zinc-600 mt-1 mb-3">
           A brief, descriptive title for this request
         </p>
-        <Input
-          id="requestTitle"
-          tabIndex={5}
-          {...register('requestTitle')}
-          placeholder="e.g., Water Bottle Mockup for Q1 Campaign"
-          className="mt-2"
-        />
-        {errors.requestTitle && (
-          <p className="text-sm text-red-600 mt-2">{errors.requestTitle.message}</p>
-        )}
+        <div className="relative">
+          <Input
+            id="requestTitle"
+            tabIndex={5}
+            {...register('requestTitle')}
+            placeholder="e.g., Water Bottle Mockup for Q1 Campaign"
+            className={`pr-10 ${errors.requestTitle ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+          />
+          {watch('requestTitle') && watch('requestTitle').length > 0 && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {watch('requestTitle').length > 5 ? (
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              ) : (
+                <AlertCircle className="w-5 h-5 text-amber-500" />
+              )}
+            </div>
+          )}
+        </div>
+        {errors.requestTitle ? (
+          <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+            {errors.requestTitle.message}
+          </p>
+        ) : watch('requestTitle') &&
+          watch('requestTitle').length > 0 &&
+          watch('requestTitle').length < 6 ? (
+          <p className="text-sm text-amber-600 mt-2 flex items-center gap-1">
+            <AlertCircle className="w-4 h-4" />
+            Consider adding more detail to your title
+          </p>
+        ) : null}
       </div>
 
       {/* Type-Specific Fields - Conditionally rendered based on requestType */}
@@ -509,9 +581,12 @@ export function ProjectDetailsStep() {
       {/* Project Number - shown for all types except Sneak Peek */}
       {requestType !== 'Sneak Peek' && (
         <div>
-          <Label htmlFor="projectNumber">
-            Project# <span className="text-zinc-500 text-sm">(Optional)</span>
-          </Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="projectNumber">
+              Project# <span className="text-zinc-500 text-sm">(Optional)</span>
+            </Label>
+            <Tooltip content="The commonsku project reference number. This is a numeric identifier used to link this art request to an existing project in commonsku. You can find this in the project URL or project details page." />
+          </div>
           <p className="text-sm text-zinc-600 mt-1 mb-3">
             commonsku project reference number (numbers only)
           </p>
@@ -532,7 +607,16 @@ export function ProjectDetailsStep() {
             }}
           />
           {errors.projectNumber && (
-            <p className="text-sm text-red-600 mt-2">{errors.projectNumber.message}</p>
+            <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {errors.projectNumber.message}
+            </p>
           )}
         </div>
       )}
@@ -543,32 +627,64 @@ export function ProjectDetailsStep() {
           <Label htmlFor="dueDate">
             Due Date <span className="text-red-500">*</span>
           </Label>
-          <Input
-            id="dueDate"
-            type="date"
-            tabIndex={7}
-            {...register('dueDate')}
-            className="mt-2"
-          />
-          {errors.dueDate && (
-            <p className="text-sm text-red-600 mt-2">{errors.dueDate.message}</p>
-          )}
+          <div className="mt-2">
+            <DatePickerEnhanced
+              id="dueDate"
+              value={watch('dueDate')}
+              onChange={(value) => setValue('dueDate', value, { shouldValidate: true })}
+              error={errors.dueDate?.message}
+            />
+          </div>
         </div>
 
         <div>
           <Label htmlFor="dueTime">
             Due Time <span className="text-zinc-500 text-sm">(Optional)</span>
           </Label>
-          <Input
-            id="dueTime"
-            type="time"
-            tabIndex={8}
-            {...register('dueTime')}
-            className="mt-2"
-          />
-          <p className="text-xs text-zinc-500 mt-1">Eastern Standard Time</p>
+          <div className="relative mt-2">
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <Input
+              id="dueTime"
+              type="time"
+              tabIndex={8}
+              {...register('dueTime')}
+              className="pl-10"
+              defaultValue="18:00"
+            />
+          </div>
+          <p className="text-xs text-zinc-500 mt-1 flex items-center gap-1">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Eastern Standard Time (EST)
+          </p>
           {errors.dueTime && (
-            <p className="text-sm text-red-600 mt-2">{errors.dueTime.message}</p>
+            <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {errors.dueTime.message}
+            </p>
           )}
         </div>
       </div>
