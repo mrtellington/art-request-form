@@ -422,30 +422,6 @@ export function FormContainer({
             </div>
           )}
 
-          {/* Keyboard shortcuts hint - hidden on mobile */}
-          <div className="mb-6 text-xs text-zinc-500 items-center justify-center gap-4 pb-4 border-b border-zinc-100 hidden sm:flex">
-            <span className="flex items-center gap-1">
-              <kbd className="px-2 py-1 bg-zinc-100 border border-zinc-300 rounded text-zinc-700">
-                Ctrl
-              </kbd>
-              <span>+</span>
-              <kbd className="px-2 py-1 bg-zinc-100 border border-zinc-300 rounded text-zinc-700">
-                →
-              </kbd>
-              <span>Next</span>
-            </span>
-            <span className="flex items-center gap-1">
-              <kbd className="px-2 py-1 bg-zinc-100 border border-zinc-300 rounded text-zinc-700">
-                Ctrl
-              </kbd>
-              <span>+</span>
-              <kbd className="px-2 py-1 bg-zinc-100 border border-zinc-300 rounded text-zinc-700">
-                ←
-              </kbd>
-              <span>Previous</span>
-            </span>
-          </div>
-
           {/* Navigation */}
           <FormNavigation
             onPrevious={handlePrevious}

@@ -8,12 +8,13 @@
 'use client';
 
 import { useAuth } from '@/lib/firebase/AuthContext';
-import { signInWithGoogle } from '@/lib/firebase/auth';
+import { signInWithGoogle, signOut } from '@/lib/firebase/auth';
 import { Button } from '@/components/ui/button';
 import { FormContainer } from '@/components/form/FormContainer';
 import { FormData, FileAttachment } from '@/types/form';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 /**
  * Convert a File object to base64 string
@@ -178,13 +179,21 @@ export default function RequestPage() {
               <h1 className="text-2xl sm:text-3xl font-bold text-midnight">
                 Art Request Form
               </h1>
-              <p className="text-zinc-600 mt-1 text-sm sm:text-base">
-                Submit your art request with all necessary details
-              </p>
             </div>
-            <div className="text-xs sm:text-sm text-zinc-600 px-3 py-1.5 bg-white border border-zinc-200 rounded-lg shadow-sm">
-              <span className="hidden sm:inline">Signed in as </span>
-              <span className="font-medium">{user.email}</span>
+            <div className="flex items-center gap-2">
+              <Link href="/submissions">
+                <Button variant="ghost" size="sm" className="text-xs sm:text-sm">
+                  My Submissions
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => signOut()}
+                className="text-xs sm:text-sm"
+              >
+                Log Out
+              </Button>
             </div>
           </div>
         </div>

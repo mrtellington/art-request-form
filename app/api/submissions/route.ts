@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 
 // Initialize Firebase Admin (only when API is called)
@@ -31,15 +31,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const search = searchParams.get('search');
+    const email = searchParams.get('email');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
     const db = getFirestoreDb();
     let query = db.collection('submissions').orderBy('createdAt', 'desc');
 
-    // Filter by status if provided
+    // Filter by status if provided (server-side)
     if (status && status !== 'all') {
-      query = query.where('status', '==', status) as any;
+      query = query.where('status', '==', status) as ReturnType<typeof query.where>;
     }
 
     // Apply limit and offset for pagination
@@ -61,6 +62,13 @@ export async function GET(request: NextRequest) {
         googleDriveFolderUrl: data.googleDriveFolderUrl,
       };
     });
+
+    // Filter by email (client-side to avoid composite index requirement)
+    if (email) {
+      submissions = submissions.filter(
+        (sub) => sub.requestorEmail?.toLowerCase() === email.toLowerCase()
+      );
+    }
 
     // Apply search filter on client side (simpler than complex Firestore queries)
     if (search) {
