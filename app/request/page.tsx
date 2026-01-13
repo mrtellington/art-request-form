@@ -169,18 +169,23 @@ export default function RequestPage() {
 
   // Authenticated - show form
   return (
-    <div className="min-h-screen bg-zinc-50 py-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-zinc-50 py-4 sm:py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="max-w-4xl mx-auto mb-8">
-          <div className="flex justify-between items-center">
+        <div className="max-w-4xl mx-auto mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
-              <h1 className="text-3xl font-bold text-midnight">Art Request Form</h1>
-              <p className="text-zinc-600 mt-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-midnight">
+                Art Request Form
+              </h1>
+              <p className="text-zinc-600 mt-1 text-sm sm:text-base">
                 Submit your art request with all necessary details
               </p>
             </div>
-            <div className="text-sm text-zinc-600">Signed in as {user.email}</div>
+            <div className="text-xs sm:text-sm text-zinc-600 px-3 py-1.5 bg-white border border-zinc-200 rounded-lg shadow-sm">
+              <span className="hidden sm:inline">Signed in as </span>
+              <span className="font-medium">{user.email}</span>
+            </div>
           </div>
         </div>
 

@@ -25,7 +25,7 @@ export function StepIndicator({
 }: StepIndicatorProps) {
   return (
     <nav aria-label="Progress" className="mb-2">
-      <ol className="flex items-center justify-between" role="list">
+      <ol className="flex items-center justify-between gap-2 lg:gap-0" role="list">
         {steps.map((step, index) => {
           const isCompleted = completedSteps.has(index);
           const isCurrent = index === currentStepIndex;
@@ -82,9 +82,9 @@ export function StepIndicator({
                   )}
                 </span>
 
-                {/* Step Label with improved typography */}
+                {/* Step Label with improved typography - responsive */}
                 <span
-                  className={`mt-3 text-sm font-medium text-center whitespace-nowrap transition-colors ${
+                  className={`mt-3 text-xs sm:text-sm font-medium text-center whitespace-nowrap transition-colors hidden sm:block ${
                     isCurrent
                       ? 'text-primary font-semibold'
                       : isPast
@@ -95,9 +95,9 @@ export function StepIndicator({
                   {step.label}
                 </span>
 
-                {/* Step Description - only show for current/completed */}
+                {/* Step Description - only show for current/completed on larger screens */}
                 {(isCurrent || isCompleted) && step.description && (
-                  <span className="mt-1 text-xs text-zinc-500 text-center max-w-[120px] line-clamp-2">
+                  <span className="mt-1 text-xs text-zinc-500 text-center max-w-[120px] line-clamp-2 hidden lg:block">
                     {step.description}
                   </span>
                 )}

@@ -338,8 +338,8 @@ export function FormContainer({
           />
         </div>
 
-        {/* Form Content with enhanced spacing */}
-        <Card className="p-8 lg:p-10 shadow-lg">
+        {/* Form Content with enhanced spacing - responsive */}
+        <Card className="p-4 sm:p-6 lg:p-10 shadow-lg">
           {/* Auto-save Indicator with improved styling */}
           {(isSaving || lastSaved) && (
             <div className="flex items-center gap-2 text-sm mb-6 px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg">
@@ -422,8 +422,8 @@ export function FormContainer({
             </div>
           )}
 
-          {/* Keyboard shortcuts hint */}
-          <div className="mb-6 text-xs text-zinc-500 flex items-center justify-center gap-4 pb-4 border-b border-zinc-100">
+          {/* Keyboard shortcuts hint - hidden on mobile */}
+          <div className="mb-6 text-xs text-zinc-500 items-center justify-center gap-4 pb-4 border-b border-zinc-100 hidden sm:flex">
             <span className="flex items-center gap-1">
               <kbd className="px-2 py-1 bg-zinc-100 border border-zinc-300 rounded text-zinc-700">
                 Ctrl
