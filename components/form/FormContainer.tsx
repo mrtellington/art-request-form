@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormData, initialFormData } from '@/types/form';
@@ -289,11 +289,47 @@ export function FormContainer({
     }
   };
 
+  // Add keyboard shortcut handler
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      // Enter key to proceed (avoid on textareas)
+      if (
+        e.key === 'Enter' &&
+        !e.shiftKey &&
+        !(e.target as HTMLElement)?.matches('textarea')
+      ) {
+        const activeElement = document.activeElement as HTMLElement;
+        if (activeElement?.tagName !== 'BUTTON') {
+          e.preventDefault();
+          handleNext();
+        }
+      }
+      // Arrow keys for navigation
+      if (e.key === 'ArrowRight' && e.ctrlKey && !isLastStep) {
+        e.preventDefault();
+        handleNext();
+      }
+      if (e.key === 'ArrowLeft' && e.ctrlKey && !isFirstStep) {
+        e.preventDefault();
+        handlePrevious();
+      }
+    },
+    [handleNext, handlePrevious, isFirstStep, isLastStep]
+  );
+
+  // Register keyboard shortcuts
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [handleKeyDown]);
+
   return (
     <FormProvider {...methods}>
       <div className="max-w-4xl mx-auto">
         {/* Step Indicator */}
-        <div className="mb-8">
+        <div className="mb-10">
           <StepIndicator
             steps={steps}
             currentStepIndex={currentStepIndex}
@@ -302,62 +338,113 @@ export function FormContainer({
           />
         </div>
 
-        {/* Form Content */}
-        <Card className="p-8">
-          {/* Auto-save Indicator */}
+        {/* Form Content with enhanced spacing */}
+        <Card className="p-8 lg:p-10 shadow-lg">
+          {/* Auto-save Indicator with improved styling */}
           {(isSaving || lastSaved) && (
-            <div className="flex items-center gap-2 text-sm text-zinc-600 mb-4">
-              <Save className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-sm mb-6 px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg">
+              <Save
+                className={`w-4 h-4 ${isSaving ? 'animate-pulse text-primary' : 'text-zinc-600'}`}
+              />
               {isSaving ? (
-                <span>Saving draft...</span>
+                <span className="text-zinc-700 font-medium">Saving draft...</span>
               ) : lastSaved ? (
-                <span>Draft saved at {lastSaved.toLocaleTimeString()}</span>
+                <span className="text-zinc-600">
+                  Draft saved at {lastSaved.toLocaleTimeString()}
+                </span>
               ) : null}
             </div>
           )}
 
-          {/* Step Header */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-midnight">{currentStep.label}</h2>
+          {/* Step Header with enhanced typography */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <h2 className="text-3xl font-bold text-midnight">{currentStep.label}</h2>
               {/* Show selected request type badge after step 1 */}
               {currentStepIndex > 0 && methods.watch('requestType') && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">
+                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-primary/10 to-primary/20 text-primary border border-primary/20">
                   {methods.watch('requestType')}
                 </span>
               )}
             </div>
             {currentStep.description && (
-              <p className="text-zinc-600 mt-1">{currentStep.description}</p>
+              <p className="text-zinc-600 mt-2 text-base leading-relaxed">
+                {currentStep.description}
+              </p>
             )}
           </div>
 
-          {/* Current Step Content */}
-          <div className="mb-6">{renderStep()}</div>
+          {/* Current Step Content with better spacing */}
+          <div className="mb-8">{renderStep()}</div>
 
-          {/* Validation Error Display */}
+          {/* Enhanced Validation Error Display */}
           {(submitError || (isLastStep && Object.keys(formErrors).length > 0)) && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <h4 className="font-medium text-red-800 mb-2">
-                Please fix the following errors:
-              </h4>
-              {submitError && (
-                <pre className="text-sm text-red-700 whitespace-pre-wrap">
-                  {submitError}
-                </pre>
-              )}
-              {isLastStep && Object.keys(formErrors).length > 0 && !submitError && (
-                <ul className="text-sm text-red-700 space-y-1">
-                  {Object.entries(formErrors).map(([field, error]) => (
-                    <li key={field}>
-                      • {field}:{' '}
-                      {(error as { message?: string })?.message || 'Invalid value'}
-                    </li>
-                  ))}
-                </ul>
-              )}
+            <div
+              className="mb-8 p-5 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm"
+              role="alert"
+            >
+              <div className="flex items-start gap-3">
+                <svg
+                  className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-red-800 mb-2 text-base">
+                    Please fix the following errors:
+                  </h4>
+                  {submitError && (
+                    <pre className="text-sm text-red-700 whitespace-pre-wrap leading-relaxed">
+                      {submitError}
+                    </pre>
+                  )}
+                  {isLastStep && Object.keys(formErrors).length > 0 && !submitError && (
+                    <ul className="text-sm text-red-700 space-y-2">
+                      {Object.entries(formErrors).map(([field, error]) => (
+                        <li key={field} className="flex items-start gap-2">
+                          <span className="text-red-500">•</span>
+                          <span>
+                            <strong>{field}:</strong>{' '}
+                            {(error as { message?: string })?.message || 'Invalid value'}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
             </div>
           )}
+
+          {/* Keyboard shortcuts hint */}
+          <div className="mb-6 text-xs text-zinc-500 flex items-center justify-center gap-4 pb-4 border-b border-zinc-100">
+            <span className="flex items-center gap-1">
+              <kbd className="px-2 py-1 bg-zinc-100 border border-zinc-300 rounded text-zinc-700">
+                Ctrl
+              </kbd>
+              <span>+</span>
+              <kbd className="px-2 py-1 bg-zinc-100 border border-zinc-300 rounded text-zinc-700">
+                →
+              </kbd>
+              <span>Next</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="px-2 py-1 bg-zinc-100 border border-zinc-300 rounded text-zinc-700">
+                Ctrl
+              </kbd>
+              <span>+</span>
+              <kbd className="px-2 py-1 bg-zinc-100 border border-zinc-300 rounded text-zinc-700">
+                ←
+              </kbd>
+              <span>Previous</span>
+            </span>
+          </div>
 
           {/* Navigation */}
           <FormNavigation

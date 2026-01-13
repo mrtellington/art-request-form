@@ -78,47 +78,67 @@ export function RequestTypeStep() {
             key={value}
             type="button"
             onClick={() => handleSelect(value)}
-            className={`relative flex items-start gap-4 p-4 rounded-lg border-2 transition-all text-left ${
+            aria-pressed={selectedType === value}
+            aria-label={`Select ${label}: ${description}`}
+            className={`group relative flex items-start gap-4 p-5 rounded-xl border-2 transition-all duration-200 text-left ${
               selectedType === value
-                ? 'border-primary bg-primary/5 ring-2 ring-primary ring-opacity-50'
-                : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+                ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20 scale-[1.02]'
+                : 'border-zinc-200 hover:border-primary/40 hover:bg-zinc-50 hover:shadow-md hover:scale-[1.01]'
             }`}
           >
-            {/* Icon */}
+            {/* Icon with enhanced animation */}
             <div
-              className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
+              className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-200 ${
                 selectedType === value
-                  ? 'bg-primary text-white'
-                  : 'bg-zinc-100 text-zinc-600'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-zinc-100 text-zinc-600 group-hover:bg-primary/10 group-hover:text-primary'
               }`}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-6 h-6" />
             </div>
 
             {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="font-semibold text-midnight">{label}</div>
-              <div className="text-sm text-zinc-600 mt-0.5">{description}</div>
+            <div className="flex-1 min-w-0 pt-1">
+              <div className="font-semibold text-midnight text-base mb-1">{label}</div>
+              <div className="text-sm text-zinc-600 leading-relaxed">{description}</div>
             </div>
 
-            {/* Selected Indicator */}
+            {/* Selected Indicator with animation */}
             {selectedType === value && (
-              <div className="absolute top-3 right-3 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+              <div className="absolute top-4 right-4 w-6 h-6 bg-primary rounded-full flex items-center justify-center shadow-md animate-in zoom-in duration-200">
                 <svg
-                  className="w-3 h-3 text-white"
+                  className="w-4 h-4 text-white"
                   fill="currentColor"
                   viewBox="0 0 12 12"
+                  aria-hidden="true"
                 >
                   <path d="M10.28 2.28L4.5 8.06l-2.78-2.78L0 7l4.5 4.5 7.5-7.5z" />
                 </svg>
               </div>
+            )}
+
+            {/* Hover indicator for unselected cards */}
+            {selectedType !== value && (
+              <div className="absolute inset-0 rounded-xl ring-2 ring-primary ring-opacity-0 group-hover:ring-opacity-20 transition-all duration-200 pointer-events-none" />
             )}
           </button>
         ))}
       </div>
 
       {errors.requestType && (
-        <p className="text-sm text-red-600">{errors.requestType.message}</p>
+        <div
+          className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3"
+          role="alert"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
+          {errors.requestType.message}
+        </div>
       )}
     </div>
   );
