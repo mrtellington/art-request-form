@@ -18,11 +18,9 @@ import {
   ProjectValue,
   Billable,
   Label as FormLabel,
-  ClientType,
   WebsiteLink,
 } from '@/types/form';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
@@ -49,7 +47,6 @@ const RichTextEditor = dynamic(
 );
 
 const labels: FormLabel[] = ['Call Needed', 'Rush', 'Needs Creative'];
-const clientTypes: ClientType[] = ['Prospect', 'Client', 'Enterprise'];
 
 const emptyLink: Omit<WebsiteLink, 'id'> = {
   type: '',
@@ -58,7 +55,6 @@ const emptyLink: Omit<WebsiteLink, 'id'> = {
 
 export function AdditionalInfoStep() {
   const {
-    register,
     control,
     watch,
     setValue,
@@ -73,7 +69,6 @@ export function AdditionalInfoStep() {
   const requestType = watch('requestType');
   const projectValue = watch('projectValue');
   const billable = watch('billable');
-  const clientType = watch('clientType');
   const selectedLabels = watch('labels') || [];
   const addCollaborators = watch('addCollaborators') || false;
   const collaborators = watch('collaborators') || [];
@@ -180,36 +175,6 @@ export function AdditionalInfoStep() {
             )}
           </div>
         )}
-
-        {/* Client Type */}
-        <div>
-          <Label htmlFor="clientType">
-            Client Type <span className="text-red-500">*</span>
-          </Label>
-          <p className="text-sm text-zinc-600 mt-1 mb-3">
-            Select the client relationship type
-          </p>
-          <Select
-            value={clientType || undefined}
-            onValueChange={(value) =>
-              setValue('clientType', value as ClientType, { shouldValidate: true })
-            }
-          >
-            <SelectTrigger id="clientType">
-              <SelectValue placeholder="Select client type" />
-            </SelectTrigger>
-            <SelectContent>
-              {clientTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.clientType && (
-            <p className="text-sm text-red-600 mt-2">{errors.clientType.message}</p>
-          )}
-        </div>
 
         {/* Labels */}
         <div>

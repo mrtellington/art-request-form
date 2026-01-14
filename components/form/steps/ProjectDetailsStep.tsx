@@ -278,7 +278,7 @@ export function ProjectDetailsStep() {
                   found
                 </p>
               </div>
-              {searchResults.map((client, index) => (
+              {searchResults.map((client) => (
                 <button
                   key={client.id}
                   type="button"
@@ -352,6 +352,38 @@ export function ProjectDetailsStep() {
       <input type="hidden" {...register('clientExists')} />
       <input type="hidden" {...register('clientId')} />
 
+      {/* Client Type - Only for Proofs */}
+      {requestType === 'Proofs' && (
+        <div>
+          <Label htmlFor="clientType">
+            Client Type <span className="text-red-500">*</span>
+          </Label>
+          <p className="text-sm text-zinc-600 mt-1 mb-3">
+            Select the client relationship type
+          </p>
+          <Select
+            value={watch('clientType') || undefined}
+            onValueChange={(value) =>
+              setValue('clientType', value as 'Prospect' | 'Client' | 'Enterprise', {
+                shouldValidate: true,
+              })
+            }
+          >
+            <SelectTrigger id="clientType" tabIndex={4}>
+              <SelectValue placeholder="Select client type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Prospect">Prospect</SelectItem>
+              <SelectItem value="Client">Client</SelectItem>
+              <SelectItem value="Enterprise">Enterprise</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.clientType && (
+            <p className="text-sm text-red-600 mt-2">{errors.clientType.message}</p>
+          )}
+        </div>
+      )}
+
       {/* Region */}
       <div>
         <Label htmlFor="region">
@@ -366,7 +398,7 @@ export function ProjectDetailsStep() {
             setValue('region', value as Region, { shouldValidate: true })
           }
         >
-          <SelectTrigger id="region" tabIndex={4}>
+          <SelectTrigger id="region" tabIndex={5}>
             <SelectValue placeholder="Select a region" />
           </SelectTrigger>
           <SelectContent>
@@ -400,7 +432,7 @@ export function ProjectDetailsStep() {
         <div className="relative">
           <Input
             id="requestTitle"
-            tabIndex={5}
+            tabIndex={6}
             {...register('requestTitle')}
             placeholder="e.g., Water Bottle Mockup for Q1 Campaign"
             className={`pr-10 ${errors.requestTitle ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
@@ -570,12 +602,7 @@ export function ProjectDetailsStep() {
       )}
 
       {requestType === 'Rise & Shine' && (
-        <RiseAndShineSection
-          watch={watch}
-          setValue={setValue}
-          register={register}
-          errors={errors}
-        />
+        <RiseAndShineSection watch={watch} setValue={setValue} errors={errors} />
       )}
 
       {/* Project Number - shown for all types except Sneak Peek */}
@@ -592,7 +619,7 @@ export function ProjectDetailsStep() {
           </p>
           <Input
             id="projectNumber"
-            tabIndex={6}
+            tabIndex={7}
             {...register('projectNumber', {
               pattern: {
                 value: /^[0-9]*$/,
@@ -699,16 +726,10 @@ export function ProjectDetailsStep() {
 interface RiseAndShineSectionProps {
   watch: ReturnType<typeof useFormContext<FormData>>['watch'];
   setValue: ReturnType<typeof useFormContext<FormData>>['setValue'];
-  register: ReturnType<typeof useFormContext<FormData>>['register'];
   errors: ReturnType<typeof useFormContext<FormData>>['formState']['errors'];
 }
 
-function RiseAndShineSection({
-  watch,
-  setValue,
-  register,
-  errors,
-}: RiseAndShineSectionProps) {
+function RiseAndShineSection({ watch, setValue, errors }: RiseAndShineSectionProps) {
   const riseAndShineLevel = watch('riseAndShineLevel');
   const levelConfig = riseAndShineLevel ? RISE_AND_SHINE_LEVELS[riseAndShineLevel] : null;
 

@@ -1,0 +1,61 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is from whitestonebranding.com
+    function isWhitestoneUser() {
+      return isAuthenticated()
+        && request.auth.token.email.matches('.*@whitestonebranding[.]com$');
+    }
+
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Drafts collection - users can read/write their own drafts
+    match /drafts/{userId} {
+      // Allow read/write if authenticated and it's their own draft
+      allow read, write: if isAuthenticated() && isOwner(userId);
+
+      // Allow create if authenticated and creating their own draft
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+
+      // Allow update if authenticated and updating their own draft
+      allow update: if isAuthenticated() && isOwner(userId);
+
+      // Allow delete if authenticated and deleting their own draft
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Submissions collection
+    match /submissions/{submissionId} {
+      // Allow read if:
+      // - User is authenticated and from whitestonebranding.com
+      // - AND the submission belongs to them (requestorEmail matches)
+      allow read: if isWhitestoneUser()
+        && resource.data.requestorEmail == request.auth.token.email;
+
+      // Allow create only from server (API routes use admin SDK)
+      // Client-side creates are blocked
+      allow create: if false;
+
+      // Allow update only from server
+      allow update: if false;
+
+      // Allow delete only from server
+      allow delete: if false;
+    }
+
+    // Deny all other access by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

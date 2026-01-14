@@ -31,12 +31,11 @@ export function ProductInput({ product, onChange, baseTabIndex = 0 }: ProductInp
     size: product.size || '',
     notes: product.notes || '',
   });
-  const prevProductIdRef = useRef(product.id);
+  const [prevProductId, setPrevProductId] = useState(product.id);
 
-  // Reset local state if product id changes (e.g., when cloning)
-  /* eslint-disable react-hooks/refs */
-  if (product.id !== prevProductIdRef.current) {
-    prevProductIdRef.current = product.id;
+  // Reset local state when product ID changes (getDerivedStateFromProps pattern)
+  if (product.id !== prevProductId) {
+    setPrevProductId(product.id);
     setLocalValues({
       name: product.name,
       link: product.link || '',
@@ -48,7 +47,6 @@ export function ProductInput({ product, onChange, baseTabIndex = 0 }: ProductInp
       notes: product.notes || '',
     });
   }
-  /* eslint-enable react-hooks/refs */
 
   const handleLocalChange = (field: keyof typeof localValues, value: string) => {
     setLocalValues((prev) => ({ ...prev, [field]: value }));

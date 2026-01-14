@@ -16,7 +16,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { formDataSchema } from '@/lib/schemas/form-schema';
 import { handleGoogleDriveIntegration } from '@/lib/integrations/google-drive';
 import { handleAsanaIntegration } from '@/lib/integrations/asana';
-import { sendSlackErrorNotification, sendSlackSuccessNotification } from '@/lib/integrations/slack';
+import {
+  sendSlackErrorNotification,
+  sendSlackSuccessNotification,
+} from '@/lib/integrations/slack';
 import { rateLimit, RateLimits } from '@/lib/middleware/rate-limit';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
@@ -63,18 +66,170 @@ export async function POST(request: NextRequest) {
 
     const formData = validationResult.data;
 
+    // Sanitize form data for Firestore (remove non-serializable objects and clean structure)
+    const sanitizeForFirestore = (data: unknown): Record<string, unknown> => {
+      // Helper to recursively clean objects
+      const cleanObject = (obj: unknown): unknown => {
+        if (obj === null || obj === undefined) return null;
+
+        // Handle arrays
+        if (Array.isArray(obj)) {
+          return obj
+            .map(cleanObject)
+            .filter((item) => item !== null && item !== undefined);
+        }
+
+        // Handle objects
+        if (typeof obj === 'object') {
+          // Skip File and Blob objects entirely
+          if (obj instanceof File || obj instanceof Blob) return null;
+
+          const cleaned: Record<string, unknown> = {};
+          for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+              const value = obj[key];
+
+              // Skip undefined and 'file' properties (File objects from FileAttachment)
+              if (value === undefined || key === 'file') {
+                continue;
+              }
+
+              // Skip File/Blob objects
+              if (value instanceof File || value instanceof Blob) {
+                continue;
+              }
+
+              // Handle localUrl (blob URLs) - skip them as they're not serializable
+              if (
+                key === 'localUrl' &&
+                typeof value === 'string' &&
+                value.startsWith('blob:')
+              ) {
+                continue;
+              }
+
+              // Recursively clean nested objects and arrays
+              const cleanedValue = cleanObject(value);
+
+              // Only include non-null, non-undefined values
+              if (cleanedValue !== null && cleanedValue !== undefined) {
+                // For arrays, skip empty arrays unless it's a critical field
+                if (Array.isArray(cleanedValue) && cleanedValue.length === 0) {
+                  // Keep empty arrays for critical fields
+                  if (
+                    [
+                      'attachments',
+                      'slides',
+                      'products',
+                      'websiteLinks',
+                      'collaborators',
+                      'labels',
+                    ].includes(key)
+                  ) {
+                    cleaned[key] = cleanedValue;
+                  }
+                } else {
+                  cleaned[key] = cleanedValue;
+                }
+              }
+            }
+          }
+          return cleaned;
+        }
+
+        return obj;
+      };
+
+      // Clean the entire data structure
+      const cleaned = cleanObject(data);
+
+      // Ensure critical arrays are present (even if empty) and properly structured
+      return {
+        ...cleaned,
+        attachments: Array.isArray(cleaned.attachments) ? cleaned.attachments : [],
+        slides: Array.isArray(cleaned.slides) ? cleaned.slides : [],
+        products: Array.isArray(cleaned.products) ? cleaned.products : [],
+        websiteLinks: Array.isArray(cleaned.websiteLinks) ? cleaned.websiteLinks : [],
+        collaborators: Array.isArray(cleaned.collaborators) ? cleaned.collaborators : [],
+        labels: Array.isArray(cleaned.labels) ? cleaned.labels : [],
+      };
+    };
+
+    const sanitizedFormData = sanitizeForFirestore(formData);
+
+    // Debug: Log the sanitized data structure
+    console.log('Sanitized form data:', JSON.stringify(sanitizedFormData, null, 2));
+
     // Create initial submission document in Firestore
     currentStep = 'firestore_create';
     const db = getFirestoreDb();
-    const submissionRef = await db.collection('submissions').add({
-      ...formData,
-      status: 'processing',
-      createdAt: Timestamp.now(),
-      lastModified: Timestamp.now(),
-      version: '1.0',
-    });
 
-    submissionId = submissionRef.id;
+    let submissionRef;
+    try {
+      submissionRef = await db.collection('submissions').add({
+        ...sanitizedFormData,
+        status: 'processing',
+        createdAt: Timestamp.now(),
+        lastModified: Timestamp.now(),
+        version: '1.0',
+      });
+      submissionId = submissionRef.id;
+    } catch (firestoreError) {
+      // If full data save fails, try to save with minimal structure but keep all data
+      console.error(
+        'Full Firestore save failed, attempting to save with error status:',
+        firestoreError
+      );
+
+      try {
+        // Try to save the full sanitized data but with error status
+        submissionRef = await db.collection('submissions').add({
+          ...sanitizedFormData,
+          status: 'error',
+          errorMessage: `Failed to save submission initially: ${firestoreError instanceof Error ? firestoreError.message : 'Unknown error'}`,
+          errorDetails: {
+            step: currentStep,
+            timestamp: Timestamp.now(),
+            error:
+              firestoreError instanceof Error ? firestoreError.message : 'Unknown error',
+            stackTrace:
+              firestoreError instanceof Error ? firestoreError.stack : undefined,
+          },
+          createdAt: Timestamp.now(),
+          lastModified: Timestamp.now(),
+          version: '1.0',
+        });
+        submissionId = submissionRef.id;
+        console.log('Saved submission with error status:', submissionId);
+      } catch (secondError) {
+        // Last resort: save only critical fields
+        console.error('Second attempt failed, saving minimal data:', secondError);
+        submissionRef = await db.collection('submissions').add({
+          requestorName: sanitizedFormData.requestorName,
+          requestorEmail: sanitizedFormData.requestorEmail,
+          requestTitle: sanitizedFormData.requestTitle,
+          requestType: sanitizedFormData.requestType,
+          clientName: sanitizedFormData.clientName,
+          status: 'error',
+          errorMessage: `Critical save failure: ${secondError instanceof Error ? secondError.message : 'Unknown error'}`,
+          errorDetails: {
+            step: currentStep,
+            timestamp: Timestamp.now(),
+            primaryError:
+              firestoreError instanceof Error ? firestoreError.message : 'Unknown error',
+            secondaryError:
+              secondError instanceof Error ? secondError.message : 'Unknown error',
+          },
+          createdAt: Timestamp.now(),
+          lastModified: Timestamp.now(),
+          version: '1.0',
+        });
+        submissionId = submissionRef.id;
+      }
+
+      // Re-throw to trigger main error handler
+      throw firestoreError;
+    }
 
     // Step 1: Google Drive Integration
     currentStep = 'drive_folder';

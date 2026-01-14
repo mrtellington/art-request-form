@@ -43,13 +43,72 @@ export function useFormPersistence({
   const previousDataRef = useRef<string>('');
 
   /**
+   * Sanitize form data for Firestore (remove non-serializable File objects)
+   */
+  const sanitizeFormData = (data: unknown): unknown => {
+    const cleanObject = (obj: unknown): unknown => {
+      if (obj === null || obj === undefined) return null;
+
+      // Handle arrays
+      if (Array.isArray(obj)) {
+        return obj.map(cleanObject).filter((item) => item !== null && item !== undefined);
+      }
+
+      // Handle objects
+      if (typeof obj === 'object') {
+        // Skip File and Blob objects
+        if (obj instanceof File || obj instanceof Blob) return null;
+
+        const cleaned: Record<string, unknown> = {};
+        for (const key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            const value = obj[key];
+
+            // Skip 'file' property (File objects from FileAttachment)
+            if (key === 'file') continue;
+
+            // Skip undefined values
+            if (value === undefined) continue;
+
+            // Skip File/Blob objects
+            if (value instanceof File || value instanceof Blob) continue;
+
+            // Skip blob URLs (localUrl)
+            if (
+              key === 'localUrl' &&
+              typeof value === 'string' &&
+              value.startsWith('blob:')
+            ) {
+              continue;
+            }
+
+            // Recursively clean
+            const cleanedValue = cleanObject(value);
+            if (cleanedValue !== null && cleanedValue !== undefined) {
+              cleaned[key] = cleanedValue;
+            }
+          }
+        }
+        return cleaned;
+      }
+
+      return obj;
+    };
+
+    return cleanObject(data);
+  };
+
+  /**
    * Save draft to Firestore
    */
   const saveDraft = async () => {
     if (!userId || !enabled) return;
 
-    // Convert formData to JSON string for comparison
-    const currentDataString = JSON.stringify(formData);
+    // Sanitize form data to remove File objects
+    const sanitizedData = sanitizeFormData(formData);
+
+    // Convert sanitized data to JSON string for comparison
+    const currentDataString = JSON.stringify(sanitizedData);
 
     // Skip if data hasn't changed
     if (currentDataString === previousDataRef.current) {
@@ -66,15 +125,15 @@ export function useFormPersistence({
         lastModified: serverTimestamp(),
         userId,
         userEmail,
-        formData,
+        formData: sanitizedData,
         version: CURRENT_SCHEMA_VERSION,
       });
 
       setLastSaved(new Date());
       previousDataRef.current = currentDataString;
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to save draft:', err);
-      setError(err.message || 'Failed to save draft');
+      setError(err instanceof Error ? err.message : 'Failed to save draft');
     } finally {
       setIsSaving(false);
     }

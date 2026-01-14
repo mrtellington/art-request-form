@@ -72,13 +72,21 @@ export function RichTextEditor({
     return null;
   }
 
+  // Check if a mark is active or stored (to be applied on next input)
+  const isMarkActive = (markName: string) => {
+    if (editor.isActive(markName)) return true;
+    // Check stored marks for when user toggles format before typing
+    const storedMarks = editor.state.storedMarks || editor.state.selection.$from.marks();
+    return storedMarks.some((mark) => mark.type.name === markName);
+  };
+
   return (
     <div className="border border-zinc-200 rounded-lg overflow-hidden">
       {/* Toolbar */}
       <div className="border-b border-zinc-200 bg-zinc-50 p-2 flex flex-wrap gap-1">
         <Button
           type="button"
-          variant={editor.isActive('bold') ? 'default' : 'ghost'}
+          variant={isMarkActive('bold') ? 'default' : 'ghost'}
           size="sm"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -91,7 +99,7 @@ export function RichTextEditor({
 
         <Button
           type="button"
-          variant={editor.isActive('italic') ? 'default' : 'ghost'}
+          variant={isMarkActive('italic') ? 'default' : 'ghost'}
           size="sm"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -104,7 +112,7 @@ export function RichTextEditor({
 
         <Button
           type="button"
-          variant={editor.isActive('link') ? 'default' : 'ghost'}
+          variant={isMarkActive('link') ? 'default' : 'ghost'}
           size="sm"
           onMouseDown={(e) => e.preventDefault()}
           onClick={setLink}
