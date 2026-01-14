@@ -94,6 +94,11 @@ export async function POST(request: NextRequest) {
                 continue;
               }
 
+              // Skip base64Data (too large for Firestore, files are uploaded to Drive)
+              if (key === 'base64Data') {
+                continue;
+              }
+
               // Skip File/Blob objects
               if (value instanceof File || value instanceof Blob) {
                 continue;

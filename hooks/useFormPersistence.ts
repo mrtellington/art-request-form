@@ -67,6 +67,9 @@ export function useFormPersistence({
             // Skip 'file' property (File objects from FileAttachment)
             if (key === 'file') continue;
 
+            // Skip base64Data (too large for Firestore, files are uploaded to Drive)
+            if (key === 'base64Data') continue;
+
             // Skip undefined values
             if (value === undefined) continue;
 
