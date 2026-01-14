@@ -352,37 +352,35 @@ export function ProjectDetailsStep() {
       <input type="hidden" {...register('clientExists')} />
       <input type="hidden" {...register('clientId')} />
 
-      {/* Client Type - Only for Proofs */}
-      {requestType === 'Proofs' && (
-        <div>
-          <Label htmlFor="clientType">
-            Client Type <span className="text-red-500">*</span>
-          </Label>
-          <p className="text-sm text-zinc-600 mt-1 mb-3">
-            Select the client relationship type
-          </p>
-          <Select
-            value={watch('clientType') || undefined}
-            onValueChange={(value) =>
-              setValue('clientType', value as 'Prospect' | 'Client' | 'Enterprise', {
-                shouldValidate: true,
-              })
-            }
-          >
-            <SelectTrigger id="clientType" tabIndex={4}>
-              <SelectValue placeholder="Select client type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Prospect">Prospect</SelectItem>
-              <SelectItem value="Client">Client</SelectItem>
-              <SelectItem value="Enterprise">Enterprise</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.clientType && (
-            <p className="text-sm text-red-600 mt-2">{errors.clientType.message}</p>
-          )}
-        </div>
-      )}
+      {/* Client Type - Required for all request types */}
+      <div>
+        <Label htmlFor="clientType">
+          Client Type <span className="text-red-500">*</span>
+        </Label>
+        <p className="text-sm text-zinc-600 mt-1 mb-3">
+          Select the client relationship type
+        </p>
+        <Select
+          value={watch('clientType') || undefined}
+          onValueChange={(value) =>
+            setValue('clientType', value as 'Prospect' | 'Client' | 'Enterprise', {
+              shouldValidate: true,
+            })
+          }
+        >
+          <SelectTrigger id="clientType" tabIndex={4}>
+            <SelectValue placeholder="Select client type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Prospect">Prospect</SelectItem>
+            <SelectItem value="Client">Client</SelectItem>
+            <SelectItem value="Enterprise">Enterprise</SelectItem>
+          </SelectContent>
+        </Select>
+        {errors.clientType && (
+          <p className="text-sm text-red-600 mt-2">{errors.clientType.message}</p>
+        )}
+      </div>
 
       {/* Region */}
       <div>
