@@ -431,6 +431,7 @@ export function FormContainer({
             isFirstStep={isFirstStep}
             isLastStep={isLastStep}
             isSubmitting={isSubmitting}
+            errors={formErrors}
           />
         </Card>
       </div>

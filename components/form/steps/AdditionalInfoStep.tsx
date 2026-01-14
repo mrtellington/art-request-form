@@ -22,6 +22,7 @@ import {
 } from '@/types/form';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -33,7 +34,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
 import { CheckCircle } from 'lucide-react';
 import { UserAutocomplete } from '../fields/UserAutocomplete';
-import { RepeatableSection } from '../fields/RepeatableSection';
 import { WebsiteLinkInput } from '../fields/WebsiteLinkInput';
 import { FileUpload } from '../fields/FileUpload';
 
@@ -99,14 +99,6 @@ export function AdditionalInfoStep() {
     } else {
       setValue('labels', [...selectedLabels, label], { shouldValidate: true });
     }
-  };
-
-  const handleCloneLink = (index: number) => {
-    const linkToClone = fields[index];
-    append({
-      ...linkToClone,
-      id: crypto.randomUUID(),
-    });
   };
 
   return (
@@ -278,25 +270,46 @@ export function AdditionalInfoStep() {
 
       {/* Website Links */}
       <div>
-        <RepeatableSection<WebsiteLink>
-          items={fields}
-          onAdd={(item) => append(item)}
-          onRemove={(index) => remove(index)}
-          onClone={handleCloneLink}
-          renderItem={(link, index) => (
+        <Label>Websites, Social, & Inspiration</Label>
+        <p className="text-sm text-zinc-600 mt-1 mb-3">
+          Add reference links for websites, social media, or design inspiration
+        </p>
+
+        <div className="space-y-2">
+          {fields.map((link, index) => (
             <WebsiteLinkInput
+              key={link.id}
               link={link}
               onChange={(updated) => update(index, updated)}
+              onRemove={() => remove(index)}
+              canRemove={fields.length > 0}
             />
-          )}
-          emptyTemplate={emptyLink}
-          title="Websites, Social, & Inspiration"
-          description="Add reference links for websites, social media, or design inspiration"
-          minItems={0}
-          addButtonLabel="Add Website Link"
-          hideItemLabels
-          showCloneButton={false}
-        />
+          ))}
+
+          {/* Add Link Button */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => append({ ...emptyLink, id: crypto.randomUUID() })}
+            className="w-full"
+          >
+            <svg
+              className="h-4 w-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add Link
+          </Button>
+        </div>
       </div>
 
       {/* Divider */}
