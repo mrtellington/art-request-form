@@ -84,6 +84,24 @@ export interface PresentationSlide {
 }
 
 /**
+ * Trend Shop interface (for Rise & Shine Additional Content)
+ */
+export interface TrendShop {
+  id: string;
+  name: string;
+  link: string;
+}
+
+/**
+ * Marketing Collateral interface (for Rise & Shine Additional Content)
+ */
+export interface MarketingCollateral {
+  id: string;
+  collateral: string;
+  link: string;
+}
+
+/**
  * Main Form Data interface
  * All fields from the Cognito form
  */
@@ -132,6 +150,10 @@ export interface FormData {
   // Rise & Shine Presentation Structure (slides with products)
   slides: PresentationSlide[];
 
+  // Rise & Shine Additional Content
+  trendShops: TrendShop[];
+  marketingCollateral: MarketingCollateral[];
+
   // Repeatable Sections (OBJECT ARRAYS - not parallel arrays!)
   products: Product[];
   websiteLinks: WebsiteLink[];
@@ -158,6 +180,8 @@ export const initialFormData: FormData = {
   collaborators: [],
   labels: [],
   slides: [],
+  trendShops: [],
+  marketingCollateral: [],
   products: [],
   websiteLinks: [],
   attachments: [],

@@ -5,7 +5,14 @@
  * Uses HTML for Asana rich text descriptions.
  */
 
-import { FormData, Product, WebsiteLink } from '@/types/form';
+import {
+  FormData,
+  Product,
+  WebsiteLink,
+  PresentationSlide,
+  TrendShop,
+  MarketingCollateral,
+} from '@/types/form';
 
 /**
  * Asana Custom Field GIDs
@@ -143,6 +150,70 @@ export function formatWebsiteLinksHtml(links: WebsiteLink[]): string {
 }
 
 /**
+ * Format presentation slides array into HTML list for Asana description
+ */
+export function formatPresentationSlidesHtml(slides: PresentationSlide[]): string {
+  if (!slides || slides.length === 0) return '';
+
+  return slides
+    .map((slide, index) => {
+      const slideTitle = `<strong>Slide ${index + 1}: ${escapeForXml(slide.title || 'Untitled Slide')}</strong>`;
+
+      if (!slide.products || slide.products.length === 0) {
+        return slideTitle;
+      }
+
+      const products = slide.products
+        .map((product) => {
+          if (product.link) {
+            return `<li>${escapeForXml(product.title)}: <a href="${escapeForXml(ensureProtocol(product.link))}">${escapeForXml(product.link)}</a></li>`;
+          }
+          return `<li>${escapeForXml(product.title)}</li>`;
+        })
+        .join('');
+
+      return `${slideTitle}<ul>${products}</ul>`;
+    })
+    .join('\n');
+}
+
+/**
+ * Format trend shops array into HTML list for Asana description
+ */
+export function formatTrendShopsHtml(trendShops: TrendShop[]): string {
+  if (!trendShops || trendShops.length === 0) return '';
+
+  return (
+    '<ul>' +
+    trendShops
+      .map(
+        (shop) =>
+          `<li><strong>${escapeForXml(shop.name)}:</strong> <a href="${escapeForXml(ensureProtocol(shop.link))}">${escapeForXml(shop.link)}</a></li>`
+      )
+      .join('') +
+    '</ul>'
+  );
+}
+
+/**
+ * Format marketing collateral array into HTML list for Asana description
+ */
+export function formatMarketingCollateralHtml(collateral: MarketingCollateral[]): string {
+  if (!collateral || collateral.length === 0) return '';
+
+  return (
+    '<ul>' +
+    collateral
+      .map(
+        (item) =>
+          `<li><strong>${escapeForXml(item.collateral)}:</strong> <a href="${escapeForXml(ensureProtocol(item.link))}">${escapeForXml(item.link)}</a></li>`
+      )
+      .join('') +
+    '</ul>'
+  );
+}
+
+/**
  * Escape special characters for XML/HTML
  */
 function escapeXml(text: string): string {
@@ -179,8 +250,62 @@ export function buildAsanaDescription(formData: FormData): string {
     // Project Information
     sections.push('<strong>PROJECT INFORMATION</strong>\n');
 
-    // For PPTX: show PPTX Type and Client Type
-    if (formData.requestType === 'PPTX') {
+    // For PPTX Rise & Shine: show PPTX Type, Level, and Client Type
+    if (formData.requestType === 'PPTX' && formData.pptxType === 'Rise & Shine') {
+      if (formData.pptxType) {
+        sections.push(`<strong>PPTX Type:</strong> ${escapeXml(formData.pptxType)}\n`);
+      }
+      if (formData.riseAndShineLevel) {
+        sections.push(
+          `<strong>Level:</strong> ${escapeXml(formData.riseAndShineLevel)}\n`
+        );
+      }
+      if (formData.clientType) {
+        sections.push(
+          `<strong>Client Type:</strong> ${escapeXml(formData.clientType)}\n`
+        );
+      }
+
+      // Pertinent Information - convert TipTap HTML to Asana-compatible HTML
+      if (formData.pertinentInformation) {
+        sections.push('\n<strong>PERTINENT INFORMATION</strong>\n');
+        const asanaHtml = convertHtmlForAsana(formData.pertinentInformation);
+        sections.push(`${asanaHtml}\n`);
+      }
+
+      // Deck Structure - presentation slides
+      if (formData.slides && formData.slides.length > 0) {
+        sections.push('\n<strong>DECK STRUCTURE</strong>\n');
+        sections.push(formatPresentationSlidesHtml(formData.slides));
+        sections.push('\n');
+      }
+
+      // Additional Content - Trend Shops
+      if (formData.trendShops && formData.trendShops.length > 0) {
+        sections.push('\n<strong>ADDITIONAL CONTENT</strong>\n');
+        sections.push('<strong>Trend Shops:</strong>\n');
+        sections.push(formatTrendShopsHtml(formData.trendShops));
+        sections.push('\n');
+      }
+
+      // Additional Content - Marketing Collateral (if exists and has items)
+      if (formData.marketingCollateral && formData.marketingCollateral.length > 0) {
+        // Only add header if no trend shops were shown
+        if (!formData.trendShops || formData.trendShops.length === 0) {
+          sections.push('\n<strong>ADDITIONAL CONTENT</strong>\n');
+        }
+        sections.push('<strong>Marketing Collateral:</strong>\n');
+        sections.push(formatMarketingCollateralHtml(formData.marketingCollateral));
+        sections.push('\n');
+      }
+
+      // Website Links
+      if (formData.websiteLinks && formData.websiteLinks.length > 0) {
+        sections.push('\n<strong>WEBSITE &amp; SOCIAL LINKS</strong>\n');
+        sections.push(formatWebsiteLinksHtml(formData.websiteLinks));
+      }
+    } else if (formData.requestType === 'PPTX') {
+      // For other PPTX types: show PPTX Type and Client Type
       if (formData.pptxType) {
         sections.push(`<strong>PPTX Type:</strong> ${escapeXml(formData.pptxType)}\n`);
       }
@@ -188,6 +313,19 @@ export function buildAsanaDescription(formData: FormData): string {
         sections.push(
           `<strong>Client Type:</strong> ${escapeXml(formData.clientType)}\n`
         );
+      }
+
+      // Pertinent Information - convert TipTap HTML to Asana-compatible HTML
+      if (formData.pertinentInformation) {
+        sections.push('\n<strong>PERTINENT INFORMATION</strong>\n');
+        const asanaHtml = convertHtmlForAsana(formData.pertinentInformation);
+        sections.push(`${asanaHtml}\n`);
+      }
+
+      // Website Links
+      if (formData.websiteLinks && formData.websiteLinks.length > 0) {
+        sections.push('\n<strong>WEBSITE &amp; SOCIAL LINKS</strong>\n');
+        sections.push(formatWebsiteLinksHtml(formData.websiteLinks));
       }
     } else {
       // For other creative requests: show Billable and Client Type
@@ -199,20 +337,19 @@ export function buildAsanaDescription(formData: FormData): string {
           `<strong>Client Type:</strong> ${escapeXml(formData.clientType)}\n`
         );
       }
-    }
 
-    // Pertinent Information - convert TipTap HTML to Asana-compatible HTML
-    if (formData.pertinentInformation) {
-      sections.push('\n<strong>PERTINENT INFORMATION</strong>\n');
-      // Convert TipTap HTML to Asana-compatible format (preserves lists, bold, italic, links)
-      const asanaHtml = convertHtmlForAsana(formData.pertinentInformation);
-      sections.push(`${asanaHtml}\n`);
-    }
+      // Pertinent Information - convert TipTap HTML to Asana-compatible HTML
+      if (formData.pertinentInformation) {
+        sections.push('\n<strong>PERTINENT INFORMATION</strong>\n');
+        const asanaHtml = convertHtmlForAsana(formData.pertinentInformation);
+        sections.push(`${asanaHtml}\n`);
+      }
 
-    // Website Links
-    if (formData.websiteLinks && formData.websiteLinks.length > 0) {
-      sections.push('\n<strong>WEBSITE &amp; SOCIAL LINKS</strong>\n');
-      sections.push(formatWebsiteLinksHtml(formData.websiteLinks));
+      // Website Links
+      if (formData.websiteLinks && formData.websiteLinks.length > 0) {
+        sections.push('\n<strong>WEBSITE &amp; SOCIAL LINKS</strong>\n');
+        sections.push(formatWebsiteLinksHtml(formData.websiteLinks));
+      }
     }
   } else {
     // Full description for non-creative requests (Proofs, etc.)

@@ -108,6 +108,24 @@ export const presentationSlideSchema = z.object({
 });
 
 /**
+ * Trend Shop Schema (for Rise & Shine Additional Content)
+ */
+export const trendShopSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, 'Trend shop name is required'),
+  link: z.string().url('Invalid URL').min(1, 'Link is required'),
+});
+
+/**
+ * Marketing Collateral Schema (for Rise & Shine Additional Content)
+ */
+export const marketingCollateralSchema = z.object({
+  id: z.string(),
+  collateral: z.string().min(1, 'Collateral name is required'),
+  link: z.string().url('Invalid URL').min(1, 'Link is required'),
+});
+
+/**
  * Email validation
  */
 const emailSchema = z.string().email('Invalid email address');
@@ -186,6 +204,10 @@ export const formDataSchema = z
 
     // Rise & Shine Presentation Structure
     slides: z.array(presentationSlideSchema),
+
+    // Rise & Shine Additional Content
+    trendShops: z.array(trendShopSchema),
+    marketingCollateral: z.array(marketingCollateralSchema),
 
     // Repeatable Sections
     products: z.array(productSchema),

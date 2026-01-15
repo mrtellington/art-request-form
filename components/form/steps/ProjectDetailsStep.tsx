@@ -39,6 +39,7 @@ import {
   PROOF_TYPE_OPTIONS,
 } from '@/lib/constants/type-options';
 import { PresentationStructure } from '../fields/PresentationStructure';
+import { PPTXRiseAndShineSection } from '../fields/PPTXRiseAndShineSection';
 
 interface ClientResult {
   id: string;
@@ -559,6 +560,11 @@ export function ProjectDetailsStep() {
                 </p>
               </div>
             </div>
+          )}
+
+          {/* Rise & Shine Section - Only for Rise & Shine type */}
+          {watch('pptxType') === 'Rise & Shine' && (
+            <PPTXRiseAndShineSection watch={watch} setValue={setValue} errors={errors} />
           )}
         </div>
       )}
