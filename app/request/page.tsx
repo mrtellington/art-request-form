@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { FormContainer } from '@/components/form/FormContainer';
 import { FormData, FileAttachment } from '@/types/form';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 /**
@@ -64,6 +64,8 @@ export default function RequestPage() {
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const draftId = searchParams.get('draftId') || undefined;
 
   const handleSignIn = async () => {
     setSigningIn(true);
@@ -101,7 +103,7 @@ export default function RequestPage() {
             </p>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4">
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4 font-figtree">
                 {error}
               </div>
             )}
@@ -132,11 +134,12 @@ export default function RequestPage() {
         ? await processAttachments(formData.attachments)
         : [];
 
-      // Create submission data with processed attachments and user ID
+      // Create submission data with processed attachments, user ID, and draft ID
       const submissionData = {
         ...formData,
         attachments: processedAttachments,
-        userId: user.uid, // Include user ID for draft deletion
+        userId: user.uid, // Include user ID for tracking
+        draftId: draftId, // Include draft ID for draft deletion
       };
 
       // Call submission API
@@ -205,6 +208,7 @@ export default function RequestPage() {
           userId={user.uid}
           userEmail={user.email || ''}
           userName={user.displayName || ''}
+          draftId={draftId}
         />
       </div>
     </div>

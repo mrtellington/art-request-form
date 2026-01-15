@@ -217,7 +217,7 @@ export default function MySubmissionsPage() {
             {/* Error Message */}
             {error && (
               <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
-                <p className="text-sm">{error}</p>
+                <p className="text-sm font-figtree">{error}</p>
               </div>
             )}
 
@@ -281,7 +281,7 @@ export default function MySubmissionsPage() {
                             <TableCell className="text-right">
                               {submission.status === 'draft' ? (
                                 <div className="flex items-center justify-end gap-2">
-                                  <Link href="/request">
+                                  <Link href={`/request?draftId=${submission.id}`}>
                                     <Button variant="outline" size="sm">
                                       Continue
                                     </Button>

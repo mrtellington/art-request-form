@@ -204,7 +204,7 @@ export default function AdminDashboard() {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded font-figtree">
             <p className="text-sm font-medium">Error loading submissions</p>
             <p className="text-sm mt-1">{error}</p>
           </div>

@@ -338,10 +338,13 @@ export async function POST(request: NextRequest) {
     });
 
     // Delete the draft after successful submission
-    if (formData.userId) {
+    // @ts-expect-error - draftId is passed in submission data but not in FormData type
+    if (body.draftId) {
       try {
-        await db.collection('drafts').doc(formData.userId).delete();
-        console.log('Draft deleted for user:', formData.userId);
+        // @ts-expect-error - draftId is passed in submission data but not in FormData type
+        await db.collection('drafts').doc(body.draftId).delete();
+        // @ts-expect-error - draftId is passed in submission data but not in FormData type
+        console.log('Draft deleted:', body.draftId);
       } catch (draftError) {
         // Log error but don't fail the submission
         console.error('Failed to delete draft:', draftError);

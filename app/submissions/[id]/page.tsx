@@ -312,7 +312,7 @@ export default function SubmissionDetailPage() {
 
         {/* Error Message */}
         {error && (
-          <div className="max-w-5xl mx-auto mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+          <div className="max-w-5xl mx-auto mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded font-figtree">
             <p className="text-sm font-medium">Error</p>
             <p className="text-sm mt-1">{error}</p>
           </div>
@@ -466,7 +466,7 @@ export default function SubmissionDetailPage() {
 
               {/* Error Details */}
               {submission.status === 'error' && submission.errorMessage && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded font-figtree">
                   <p className="text-xs font-medium text-red-800 mb-1">Error Message</p>
                   <p className="text-xs text-red-700">{submission.errorMessage}</p>
 

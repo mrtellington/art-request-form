@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, addDoc, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { FormData } from '@/types/form';
 import { CURRENT_SCHEMA_VERSION } from '@/lib/schemas/firestore-schema';
@@ -18,6 +18,7 @@ export interface UseFormPersistenceOptions {
   userEmail: string;
   formData: Partial<FormData>;
   enabled?: boolean;
+  draftId?: string; // Optional draft ID for editing existing drafts
 }
 
 export interface UseFormPersistenceReturn {
@@ -25,6 +26,7 @@ export interface UseFormPersistenceReturn {
   lastSaved: Date | null;
   error: string | null;
   saveDraft: () => Promise<void>;
+  draftId: string | null; // Return the draft ID after creation
 }
 
 /**
@@ -35,10 +37,12 @@ export function useFormPersistence({
   userEmail,
   formData,
   enabled = true,
+  draftId: initialDraftId,
 }: UseFormPersistenceOptions): UseFormPersistenceReturn {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [draftId, setDraftId] = useState<string | null>(initialDraftId || null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousDataRef = useRef<string>('');
 
@@ -132,15 +136,28 @@ export function useFormPersistence({
     setError(null);
 
     try {
-      const draftRef = doc(db, 'drafts', userId);
-
-      await setDoc(draftRef, {
+      const draftData = {
         lastModified: serverTimestamp(),
         userId,
         userEmail,
         formData: sanitizedData,
         version: CURRENT_SCHEMA_VERSION,
-      });
+      };
+
+      if (draftId) {
+        // Update existing draft
+        console.log('Updating existing draft:', draftId);
+        const draftRef = doc(db, 'drafts', draftId);
+        await setDoc(draftRef, draftData);
+        console.log('Draft updated successfully:', draftId);
+      } else {
+        // Create new draft with auto-generated ID
+        console.log('Creating new draft for user:', userId);
+        const draftsCollection = collection(db, 'drafts');
+        const newDraftRef = await addDoc(draftsCollection, draftData);
+        console.log('New draft created with ID:', newDraftRef.id);
+        setDraftId(newDraftRef.id);
+      }
 
       setLastSaved(new Date());
       previousDataRef.current = currentDataString;
@@ -150,7 +167,7 @@ export function useFormPersistence({
     } finally {
       setIsSaving(false);
     }
-  }, [userId, enabled, formData, userEmail]);
+  }, [userId, enabled, formData, userEmail, draftId]);
 
   /**
    * Auto-save effect
@@ -180,14 +197,14 @@ export function useFormPersistence({
    * Save on page unload
    */
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !draftId) return;
 
     const handleBeforeUnload = () => {
       // Use synchronous localStorage as fallback
       // since beforeunload doesn't support async operations
       try {
         localStorage.setItem(
-          `draft-${userId}`,
+          `draft-${draftId}`,
           JSON.stringify({
             formData,
             timestamp: new Date().toISOString(),
@@ -203,12 +220,13 @@ export function useFormPersistence({
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [formData, userId, enabled]);
+  }, [formData, draftId, enabled]);
 
   return {
     isSaving,
     lastSaved,
     error,
     saveDraft,
+    draftId,
   };
 }

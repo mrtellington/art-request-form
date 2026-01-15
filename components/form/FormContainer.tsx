@@ -37,6 +37,7 @@ interface FormContainerProps {
   userName?: string;
   isReadOnly?: boolean; // For viewing submitted forms
   submissionStatus?: string; // Status of the submission if viewing
+  draftId?: string; // Optional draft ID for editing existing drafts
 }
 
 export function FormContainer({
@@ -47,6 +48,7 @@ export function FormContainer({
   userName,
   isReadOnly = false,
   submissionStatus,
+  draftId: initialDraftId,
 }: FormContainerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -79,6 +81,7 @@ export function FormContainer({
     userEmail,
     formData,
     enabled: !isReadOnly,
+    draftId: initialDraftId,
   });
 
   // Step navigation
@@ -95,23 +98,23 @@ export function FormContainer({
     canGoPrev,
   } = useStepNavigation(formData);
 
-  // Load draft on mount (only if not in read-only mode and no initial data)
+  // Load draft on mount (only if draftId is provided)
   useEffect(() => {
     const loadDraft = async () => {
-      // Skip if already have initial data, in read-only mode, or user not ready
-      if (initialData || isReadOnly || !userId) {
+      // Skip if no draftId provided, have initial data, in read-only mode, or user not ready
+      if (!initialDraftId || initialData || isReadOnly || !userId) {
         setLoadingDraft(false);
         return;
       }
 
       try {
-        const draftRef = doc(db, 'drafts', userId);
+        const draftRef = doc(db, 'drafts', initialDraftId);
         const draftSnap = await getDoc(draftRef);
 
         if (draftSnap.exists()) {
           const draft = draftSnap.data();
-          // Automatically load draft if it has meaningful data (at least request type selected)
-          if (draft.formData?.requestType) {
+          // Load draft data
+          if (draft.formData) {
             methods.reset({
               ...initialFormData,
               ...draft.formData,
@@ -128,7 +131,7 @@ export function FormContainer({
     };
 
     loadDraft();
-  }, [userId, initialData, isReadOnly, methods, userEmail, userName]);
+  }, [initialDraftId, initialData, isReadOnly, userId, methods, userEmail, userName]);
 
   // Handle form submission
   const handleFormSubmit = useCallback(
@@ -412,8 +415,74 @@ export function FormContainer({
 
         {/* Form Content with enhanced spacing - responsive */}
         <Card className="p-4 sm:p-6 lg:p-10 shadow-lg">
+          {/* Step Header with enhanced typography */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <h2 className="text-3xl font-bold text-midnight">{currentStep.label}</h2>
+              {/* Show selected request type badge after step 1 */}
+              {currentStepIndex > 0 && methods.watch('requestType') && (
+                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-primary/10 to-primary/20 text-primary border border-primary/20">
+                  {methods.watch('requestType')}
+                </span>
+              )}
+            </div>
+            {currentStep.description && (
+              <p className="text-zinc-600 mt-2 text-base leading-relaxed">
+                {currentStep.description}
+              </p>
+            )}
+          </div>
+
+          {/* Current Step Content with better spacing */}
+          <div className="mb-8">{renderStep()}</div>
+
+          {/* Enhanced Validation Error Display */}
+          {(submitError || (isLastStep && Object.keys(formErrors).length > 0)) && (
+            <div
+              className="mb-8 p-5 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm"
+              role="alert"
+            >
+              <div className="flex items-start gap-3">
+                <svg
+                  className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-red-800 mb-2 text-base font-figtree">
+                    Please fix the following errors:
+                  </h4>
+                  {submitError && (
+                    <pre className="text-sm text-red-700 whitespace-pre-wrap leading-relaxed font-figtree">
+                      {submitError}
+                    </pre>
+                  )}
+                  {isLastStep && Object.keys(formErrors).length > 0 && !submitError && (
+                    <ul className="text-sm text-red-700 space-y-2 font-figtree">
+                      {Object.entries(formErrors).map(([field, error]) => (
+                        <li key={field} className="flex items-start gap-2">
+                          <span className="text-red-500">•</span>
+                          <span>
+                            <strong>{field}:</strong>{' '}
+                            {(error as { message?: string })?.message || 'Invalid value'}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Auto-save Indicator with Manual Save Button */}
-          {!isReadOnly && (
+          {!isReadOnly && (currentStepIndex > 0 || initialDraftId) && (
             <div className="flex items-center justify-between gap-3 text-sm mb-6 px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg">
               <div className="flex items-center gap-2">
                 <Save
@@ -465,72 +534,6 @@ export function FormContainer({
               >
                 {isSaving ? 'Saving...' : 'Save Draft Now'}
               </Button>
-            </div>
-          )}
-
-          {/* Step Header with enhanced typography */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <h2 className="text-3xl font-bold text-midnight">{currentStep.label}</h2>
-              {/* Show selected request type badge after step 1 */}
-              {currentStepIndex > 0 && methods.watch('requestType') && (
-                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-primary/10 to-primary/20 text-primary border border-primary/20">
-                  {methods.watch('requestType')}
-                </span>
-              )}
-            </div>
-            {currentStep.description && (
-              <p className="text-zinc-600 mt-2 text-base leading-relaxed">
-                {currentStep.description}
-              </p>
-            )}
-          </div>
-
-          {/* Current Step Content with better spacing */}
-          <div className="mb-8">{renderStep()}</div>
-
-          {/* Enhanced Validation Error Display */}
-          {(submitError || (isLastStep && Object.keys(formErrors).length > 0)) && (
-            <div
-              className="mb-8 p-5 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm"
-              role="alert"
-            >
-              <div className="flex items-start gap-3">
-                <svg
-                  className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-red-800 mb-2 text-base">
-                    Please fix the following errors:
-                  </h4>
-                  {submitError && (
-                    <pre className="text-sm text-red-700 whitespace-pre-wrap leading-relaxed">
-                      {submitError}
-                    </pre>
-                  )}
-                  {isLastStep && Object.keys(formErrors).length > 0 && !submitError && (
-                    <ul className="text-sm text-red-700 space-y-2">
-                      {Object.entries(formErrors).map(([field, error]) => (
-                        <li key={field} className="flex items-start gap-2">
-                          <span className="text-red-500">•</span>
-                          <span>
-                            <strong>{field}:</strong>{' '}
-                            {(error as { message?: string })?.message || 'Invalid value'}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
             </div>
           )}
 

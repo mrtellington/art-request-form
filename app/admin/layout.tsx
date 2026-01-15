@@ -14,11 +14,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Shield, LogOut } from 'lucide-react';
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +25,8 @@ export default function AdminLayout({
 
     try {
       await signInWithGoogle();
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to sign in');
       setSigningIn(false);
     }
   };
@@ -38,8 +34,8 @@ export default function AdminLayout({
   const handleSignOut = async () => {
     try {
       await signOut();
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign out');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to sign out');
     }
   };
 
@@ -66,11 +62,12 @@ export default function AdminLayout({
               Admin Access Required
             </h1>
             <p className="text-zinc-600 mb-6">
-              Sign in with your @whitestonebranding.com account to access the admin dashboard.
+              Sign in with your @whitestonebranding.com account to access the admin
+              dashboard.
             </p>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4 text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4 text-sm font-figtree">
                 {error}
               </div>
             )}
@@ -104,15 +101,10 @@ export default function AdminLayout({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Link href="/admin">
-                <h1 className="text-xl font-bold text-zinc-900">
-                  Art Request Admin
-                </h1>
+                <h1 className="text-xl font-bold text-zinc-900">Art Request Admin</h1>
               </Link>
               <nav className="flex gap-4">
-                <Link
-                  href="/admin"
-                  className="text-sm text-zinc-600 hover:text-zinc-900"
-                >
+                <Link href="/admin" className="text-sm text-zinc-600 hover:text-zinc-900">
                   Submissions
                 </Link>
                 <Link
