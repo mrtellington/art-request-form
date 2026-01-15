@@ -22,6 +22,7 @@ interface FormNavigationProps {
   nextLabel?: string;
   previousLabel?: string;
   errors?: FieldErrors;
+  isReadOnly?: boolean;
 }
 
 export function FormNavigation({
@@ -35,7 +36,13 @@ export function FormNavigation({
   nextLabel,
   previousLabel,
   errors = {},
+  isReadOnly = false,
 }: FormNavigationProps) {
+  // Don't show navigation in read-only mode
+  if (isReadOnly) {
+    return null;
+  }
+
   // Default labels
   const defaultNextLabel = isLastStep ? 'Submit Request' : 'Next';
   const defaultPreviousLabel = 'Previous';

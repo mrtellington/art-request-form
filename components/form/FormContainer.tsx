@@ -17,7 +17,10 @@ import { useFormPersistence } from '@/hooks/useFormPersistence';
 import { StepIndicator } from './StepIndicator';
 import { FormNavigation } from './FormNavigation';
 import { Card } from '@/components/ui/card';
-import { Save } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Save, AlertCircle, FileText, X } from 'lucide-react';
+import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 
 // Import step components
 import { RequestTypeStep } from './steps/RequestTypeStep';
@@ -32,6 +35,8 @@ interface FormContainerProps {
   userId: string;
   userEmail: string;
   userName?: string;
+  isReadOnly?: boolean; // For viewing submitted forms
+  submissionStatus?: string; // Status of the submission if viewing
 }
 
 export function FormContainer({
@@ -40,10 +45,15 @@ export function FormContainer({
   userId,
   userEmail,
   userName,
+  isReadOnly = false,
+  submissionStatus,
 }: FormContainerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showDraftDialog, setShowDraftDialog] = useState(false);
+  const [draftData, setDraftData] = useState<Partial<FormData> | null>(null);
+  const [loadingDraft, setLoadingDraft] = useState(true);
 
   // Initialize React Hook Form
   const methods = useForm<FormData>({
@@ -65,12 +75,12 @@ export function FormContainer({
   } = methods;
   const formData = watch();
 
-  // Auto-save draft functionality
+  // Auto-save draft functionality (disabled for read-only mode)
   const { isSaving, lastSaved } = useFormPersistence({
     userId,
     userEmail,
     formData,
-    enabled: true,
+    enabled: !isReadOnly,
   });
 
   // Step navigation
@@ -86,6 +96,64 @@ export function FormContainer({
     canGoNext,
     canGoPrev,
   } = useStepNavigation(formData);
+
+  // Load draft on mount (only if not in read-only mode and no initial data)
+  useEffect(() => {
+    const loadDraft = async () => {
+      // Skip if already have initial data, in read-only mode, or user not ready
+      if (initialData || isReadOnly || !userId) {
+        setLoadingDraft(false);
+        return;
+      }
+
+      try {
+        const draftRef = doc(db, 'drafts', userId);
+        const draftSnap = await getDoc(draftRef);
+
+        if (draftSnap.exists()) {
+          const draft = draftSnap.data();
+          // Only show dialog if draft has meaningful data (at least request type selected)
+          if (draft.formData?.requestType) {
+            setDraftData(draft.formData);
+            setShowDraftDialog(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading draft:', error);
+      } finally {
+        setLoadingDraft(false);
+      }
+    };
+
+    loadDraft();
+  }, [userId, initialData, isReadOnly]);
+
+  // Handle draft dialog actions
+  const handleContinueDraft = () => {
+    if (draftData) {
+      // Reset form with draft data
+      methods.reset({
+        ...initialFormData,
+        ...draftData,
+        requestorEmail: userEmail,
+        requestorName: userName || draftData.requestorName || '',
+      });
+    }
+    setShowDraftDialog(false);
+  };
+
+  const handleStartFresh = async () => {
+    // Delete the draft
+    if (userId) {
+      try {
+        const draftRef = doc(db, 'drafts', userId);
+        await deleteDoc(draftRef);
+      } catch (error) {
+        console.error('Error deleting draft:', error);
+      }
+    }
+    setShowDraftDialog(false);
+  };
 
   // Handle form submission
   const handleFormSubmit = useCallback(
@@ -325,9 +393,101 @@ export function FormContainer({
     }
   }, [handleKeyDown]);
 
+  // Show loading state while checking for draft
+  if (loadingDraft) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-zinc-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <FormProvider {...methods}>
       <div className="max-w-4xl mx-auto">
+        {/* Draft Dialog */}
+        {showDraftDialog && draftData && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <Card className="max-w-lg w-full p-6 relative">
+              <button
+                onClick={handleStartFresh}
+                className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-start gap-3 mb-4">
+                <FileText className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                <div>
+                  <h2 className="text-xl font-semibold text-midnight mb-2">
+                    Continue from Draft?
+                  </h2>
+                  <p className="text-zinc-600 text-sm mb-4">
+                    We found a saved draft from your previous session. Would you like to
+                    continue where you left off or start fresh?
+                  </p>
+
+                  {draftData.requestType && (
+                    <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 mb-4">
+                      <p className="text-sm text-zinc-600">
+                        <span className="font-medium text-zinc-700">Request Type:</span>{' '}
+                        {draftData.requestType}
+                      </p>
+                      {draftData.clientName && (
+                        <p className="text-sm text-zinc-600 mt-1">
+                          <span className="font-medium text-zinc-700">Client:</span>{' '}
+                          {draftData.clientName}
+                        </p>
+                      )}
+                      {draftData.requestTitle && (
+                        <p className="text-sm text-zinc-600 mt-1">
+                          <span className="font-medium text-zinc-700">Title:</span>{' '}
+                          {draftData.requestTitle}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button onClick={handleContinueDraft} className="flex-1" size="lg">
+                  Continue Draft
+                </Button>
+                <Button
+                  onClick={handleStartFresh}
+                  variant="outline"
+                  className="flex-1"
+                  size="lg"
+                >
+                  Start Fresh
+                </Button>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* Read-only Indicator for Submitted Forms */}
+        {isReadOnly && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-amber-900 mb-1">
+                This form has been submitted
+              </h3>
+              <p className="text-sm text-amber-800">
+                Submitted forms cannot be edited. Any changes must be made directly in
+                Asana.
+                {submissionStatus === 'complete' && ' This request has been completed.'}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Step Indicator */}
         <div className="mb-10">
           <StepIndicator
@@ -432,6 +592,7 @@ export function FormContainer({
             isLastStep={isLastStep}
             isSubmitting={isSubmitting}
             errors={formErrors}
+            isReadOnly={isReadOnly}
           />
         </Card>
       </div>

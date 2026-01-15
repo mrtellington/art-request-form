@@ -337,6 +337,17 @@ export async function POST(request: NextRequest) {
       lastModified: Timestamp.now(),
     });
 
+    // Delete the draft after successful submission
+    if (formData.userId) {
+      try {
+        await db.collection('drafts').doc(formData.userId).delete();
+        console.log('Draft deleted for user:', formData.userId);
+      } catch (draftError) {
+        // Log error but don't fail the submission
+        console.error('Failed to delete draft:', draftError);
+      }
+    }
+
     // Send success notification (optional)
     if (driveFolderUrl && asanaTaskUrl) {
       await sendSlackSuccessNotification(formData, asanaTaskUrl, driveFolderUrl);

@@ -132,10 +132,11 @@ export default function RequestPage() {
         ? await processAttachments(formData.attachments)
         : [];
 
-      // Create submission data with processed attachments
+      // Create submission data with processed attachments and user ID
       const submissionData = {
         ...formData,
         attachments: processedAttachments,
+        userId: user.uid, // Include user ID for draft deletion
       };
 
       // Call submission API

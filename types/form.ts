@@ -111,6 +111,7 @@ export interface FormData {
   requestorEmail: string | null;
   region: Region | null;
   requestTitle: string | null;
+  userId?: string; // User ID for draft deletion (not part of form, added at submission)
 
   // Client Information
   clientName: string | null;
