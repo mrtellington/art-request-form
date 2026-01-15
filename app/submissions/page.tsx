@@ -20,7 +20,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { AlertCircle, CheckCircle, Clock, FileEdit, RefreshCw, Plus } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  FileEdit,
+  RefreshCw,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 import Link from 'next/link';
 
 interface Submission {
@@ -76,6 +84,7 @@ export default function MySubmissionsPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchSubmissions = useCallback(async () => {
     if (!user?.email) return;
@@ -102,6 +111,35 @@ export default function MySubmissionsPage() {
       setLoading(false);
     }
   }, [user?.email]);
+
+  const handleDeleteDraft = useCallback(async (draftId: string) => {
+    if (!window.confirm('Are you sure you want to delete this draft?')) {
+      return;
+    }
+
+    try {
+      setDeletingId(draftId);
+      setError(null);
+
+      const response = await fetch(`/api/drafts/${draftId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to delete draft');
+      }
+
+      // Remove the draft from the list
+      setSubmissions((prev) => prev.filter((sub) => sub.id !== draftId));
+    } catch (err) {
+      console.error('Error deleting draft:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete draft');
+    } finally {
+      setDeletingId(null);
+    }
+  }, []);
 
   useEffect(() => {
     if (user?.email) {
@@ -242,11 +280,26 @@ export default function MySubmissionsPage() {
                             </TableCell>
                             <TableCell className="text-right">
                               {submission.status === 'draft' ? (
-                                <Link href="/request">
-                                  <Button variant="outline" size="sm">
-                                    Continue
+                                <div className="flex items-center justify-end gap-2">
+                                  <Link href="/request">
+                                    <Button variant="outline" size="sm">
+                                      Continue
+                                    </Button>
+                                  </Link>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDeleteDraft(submission.id)}
+                                    disabled={deletingId === submission.id}
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  >
+                                    {deletingId === submission.id ? (
+                                      <span className="animate-spin">⏳</span>
+                                    ) : (
+                                      <Trash2 className="w-4 h-4" />
+                                    )}
                                   </Button>
-                                </Link>
+                                </div>
                               ) : (
                                 <Link href={`/submissions/${submission.id}`}>
                                   <Button variant="outline" size="sm">

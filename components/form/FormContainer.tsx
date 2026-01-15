@@ -18,8 +18,8 @@ import { StepIndicator } from './StepIndicator';
 import { FormNavigation } from './FormNavigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Save, AlertCircle, FileText, X } from 'lucide-react';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { Save, AlertCircle } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 
 // Import step components
@@ -51,8 +51,6 @@ export function FormContainer({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [showDraftDialog, setShowDraftDialog] = useState(false);
-  const [draftData, setDraftData] = useState<Partial<FormData> | null>(null);
   const [loadingDraft, setLoadingDraft] = useState(true);
 
   // Initialize React Hook Form
@@ -112,10 +110,14 @@ export function FormContainer({
 
         if (draftSnap.exists()) {
           const draft = draftSnap.data();
-          // Only show dialog if draft has meaningful data (at least request type selected)
+          // Automatically load draft if it has meaningful data (at least request type selected)
           if (draft.formData?.requestType) {
-            setDraftData(draft.formData);
-            setShowDraftDialog(true);
+            methods.reset({
+              ...initialFormData,
+              ...draft.formData,
+              requestorEmail: userEmail,
+              requestorName: userName || draft.formData.requestorName || '',
+            });
           }
         }
       } catch (error) {
@@ -126,34 +128,7 @@ export function FormContainer({
     };
 
     loadDraft();
-  }, [userId, initialData, isReadOnly]);
-
-  // Handle draft dialog actions
-  const handleContinueDraft = () => {
-    if (draftData) {
-      // Reset form with draft data
-      methods.reset({
-        ...initialFormData,
-        ...draftData,
-        requestorEmail: userEmail,
-        requestorName: userName || draftData.requestorName || '',
-      });
-    }
-    setShowDraftDialog(false);
-  };
-
-  const handleStartFresh = async () => {
-    // Delete the draft
-    if (userId) {
-      try {
-        const draftRef = doc(db, 'drafts', userId);
-        await deleteDoc(draftRef);
-      } catch (error) {
-        console.error('Error deleting draft:', error);
-      }
-    }
-    setShowDraftDialog(false);
-  };
+  }, [userId, initialData, isReadOnly, methods, userEmail, userName]);
 
   // Handle form submission
   const handleFormSubmit = useCallback(
@@ -408,69 +383,6 @@ export function FormContainer({
   return (
     <FormProvider {...methods}>
       <div className="max-w-4xl mx-auto">
-        {/* Draft Dialog */}
-        {showDraftDialog && draftData && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <Card className="max-w-lg w-full p-6 relative">
-              <button
-                onClick={handleStartFresh}
-                className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="flex items-start gap-3 mb-4">
-                <FileText className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                <div>
-                  <h2 className="text-xl font-semibold text-midnight mb-2">
-                    Continue from Draft?
-                  </h2>
-                  <p className="text-zinc-600 text-sm mb-4">
-                    We found a saved draft from your previous session. Would you like to
-                    continue where you left off or start fresh?
-                  </p>
-
-                  {draftData.requestType && (
-                    <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 mb-4">
-                      <p className="text-sm text-zinc-600">
-                        <span className="font-medium text-zinc-700">Request Type:</span>{' '}
-                        {draftData.requestType}
-                      </p>
-                      {draftData.clientName && (
-                        <p className="text-sm text-zinc-600 mt-1">
-                          <span className="font-medium text-zinc-700">Client:</span>{' '}
-                          {draftData.clientName}
-                        </p>
-                      )}
-                      {draftData.requestTitle && (
-                        <p className="text-sm text-zinc-600 mt-1">
-                          <span className="font-medium text-zinc-700">Title:</span>{' '}
-                          {draftData.requestTitle}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button onClick={handleContinueDraft} className="flex-1" size="lg">
-                  Continue Draft
-                </Button>
-                <Button
-                  onClick={handleStartFresh}
-                  variant="outline"
-                  className="flex-1"
-                  size="lg"
-                >
-                  Start Fresh
-                </Button>
-              </div>
-            </Card>
-          </div>
-        )}
-
         {/* Read-only Indicator for Submitted Forms */}
         {isReadOnly && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
