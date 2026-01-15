@@ -272,14 +272,14 @@ export const formDataSchema = z
   )
   .refine(
     (data) => {
-      // If requestType is PPTX or Rise & Shine, numberOfSlides is required
-      if (data.requestType === 'PPTX' || data.requestType === 'Rise & Shine') {
+      // If requestType is Rise & Shine, numberOfSlides is required
+      if (data.requestType === 'Rise & Shine') {
         return data.numberOfSlides !== undefined && data.numberOfSlides > 0;
       }
       return true;
     },
     {
-      message: 'Number of slides is required for PPTX and Rise & Shine requests',
+      message: 'Number of slides is required for Rise & Shine requests',
       path: ['numberOfSlides'],
     }
   )

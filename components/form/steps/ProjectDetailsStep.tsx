@@ -497,6 +497,23 @@ export function ProjectDetailsStep() {
 
       {requestType === 'PPTX' && (
         <div className="space-y-4">
+          {/* Business Development Warning */}
+          <div className="flex items-start gap-3 p-4 rounded-lg border bg-blue-50 border-blue-200">
+            <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-blue-800">
+                Business Development Team Only
+              </p>
+              <p className="text-xs text-blue-700 mt-1">
+                This card should ONLY be used by the Business Development team for new
+                opportunities. These decks will be managed by the Biz Dev team and all
+                require an informative call - the Biz Dev associate should come with ideas
+                on what intro decks should be linked, what opportunities could be
+                available, and thoughts on product to include.
+              </p>
+            </div>
+          </div>
+
           <div>
             <Label htmlFor="pptxType">
               PPTX Type <span className="text-red-500">*</span>
@@ -521,34 +538,6 @@ export function ProjectDetailsStep() {
             {errors.pptxType && (
               <p className="text-sm text-red-600 mt-2">{errors.pptxType.message}</p>
             )}
-          </div>
-
-          <div>
-            <Label htmlFor="numberOfSlides">
-              Number of Slides <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="numberOfSlides"
-              type="number"
-              min="1"
-              {...register('numberOfSlides', { valueAsNumber: true })}
-              placeholder="e.g., 10"
-              className="mt-2"
-            />
-            {errors.numberOfSlides && (
-              <p className="text-sm text-red-600 mt-2">{errors.numberOfSlides.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="presentationStructure">Presentation Structure</Label>
-            <Textarea
-              id="presentationStructure"
-              {...register('presentationStructure')}
-              placeholder="Outline the structure or flow of the presentation..."
-              rows={4}
-              className="mt-2"
-            />
           </div>
         </div>
       )}

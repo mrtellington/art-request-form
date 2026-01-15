@@ -176,13 +176,29 @@ export function buildAsanaDescription(formData: FormData): string {
     // Simplified description for creative requests
     // Only show: Project Information (Billable, Client Type), Pertinent Information, Website Links
 
-    // Project Information - Only Billable and Client Type
+    // Project Information
     sections.push('<strong>PROJECT INFORMATION</strong>\n');
-    if (formData.billable) {
-      sections.push(`<strong>Billable:</strong> ${escapeXml(formData.billable)}\n`);
-    }
-    if (formData.clientType) {
-      sections.push(`<strong>Client Type:</strong> ${escapeXml(formData.clientType)}\n`);
+
+    // For PPTX: show PPTX Type and Client Type
+    if (formData.requestType === 'PPTX') {
+      if (formData.pptxType) {
+        sections.push(`<strong>PPTX Type:</strong> ${escapeXml(formData.pptxType)}\n`);
+      }
+      if (formData.clientType) {
+        sections.push(
+          `<strong>Client Type:</strong> ${escapeXml(formData.clientType)}\n`
+        );
+      }
+    } else {
+      // For other creative requests: show Billable and Client Type
+      if (formData.billable) {
+        sections.push(`<strong>Billable:</strong> ${escapeXml(formData.billable)}\n`);
+      }
+      if (formData.clientType) {
+        sections.push(
+          `<strong>Client Type:</strong> ${escapeXml(formData.clientType)}\n`
+        );
+      }
     }
 
     // Pertinent Information - convert TipTap HTML to Asana-compatible HTML
