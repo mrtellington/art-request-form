@@ -341,7 +341,7 @@ export default function SubmissionDetailPage() {
               <h2 className="text-xl font-semibold text-zinc-900 mb-4">Products</h2>
               <div className="space-y-4">
                 {submission.products.map((product, index) => (
-                  <div key={product.id} className="border border-zinc-200 rounded-lg p-4">
+                  <div key={index} className="border border-zinc-200 rounded-lg p-4">
                     <h3 className="font-medium text-zinc-900 mb-3">
                       Product {index + 1}: {product.name}
                     </h3>
