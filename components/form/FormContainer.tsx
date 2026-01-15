@@ -76,7 +76,7 @@ export function FormContainer({
   const formData = watch();
 
   // Auto-save draft functionality (disabled for read-only mode)
-  const { isSaving, lastSaved } = useFormPersistence({
+  const { isSaving, lastSaved, saveDraft } = useFormPersistence({
     userId,
     userEmail,
     formData,
@@ -500,19 +500,59 @@ export function FormContainer({
 
         {/* Form Content with enhanced spacing - responsive */}
         <Card className="p-4 sm:p-6 lg:p-10 shadow-lg">
-          {/* Auto-save Indicator with improved styling */}
-          {(isSaving || lastSaved) && (
-            <div className="flex items-center gap-2 text-sm mb-6 px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg">
-              <Save
-                className={`w-4 h-4 ${isSaving ? 'animate-pulse text-primary' : 'text-zinc-600'}`}
-              />
-              {isSaving ? (
-                <span className="text-zinc-700 font-medium">Saving draft...</span>
-              ) : lastSaved ? (
-                <span className="text-zinc-600">
-                  Draft saved at {lastSaved.toLocaleTimeString()}
-                </span>
-              ) : null}
+          {/* Auto-save Indicator with Manual Save Button */}
+          {!isReadOnly && (
+            <div className="flex items-center justify-between gap-3 text-sm mb-6 px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Save
+                  className={`w-4 h-4 ${isSaving ? 'animate-pulse text-primary' : 'text-zinc-600'}`}
+                />
+                {(() => {
+                  const hasRequiredFields =
+                    formData.requestType &&
+                    formData.clientName?.trim() &&
+                    formData.requestTitle?.trim();
+
+                  if (isSaving) {
+                    return (
+                      <span className="text-zinc-700 font-medium">Saving draft...</span>
+                    );
+                  } else if (lastSaved) {
+                    return (
+                      <span className="text-zinc-600">
+                        Draft saved at {lastSaved.toLocaleTimeString()}
+                      </span>
+                    );
+                  } else if (hasRequiredFields) {
+                    return (
+                      <span className="text-zinc-600">
+                        Draft auto-saves every 30 seconds
+                      </span>
+                    );
+                  } else {
+                    return (
+                      <span className="text-zinc-500">
+                        Fill request type, client name, and title to enable draft saving
+                      </span>
+                    );
+                  }
+                })()}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => saveDraft()}
+                disabled={
+                  isSaving ||
+                  !formData.requestType ||
+                  !formData.clientName?.trim() ||
+                  !formData.requestTitle?.trim()
+                }
+                className="text-xs"
+              >
+                {isSaving ? 'Saving...' : 'Save Draft Now'}
+              </Button>
             </div>
           )}
 

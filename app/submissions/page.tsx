@@ -241,11 +241,19 @@ export default function MySubmissionsPage() {
                               <StatusBadge status={submission.status} />
                             </TableCell>
                             <TableCell className="text-right">
-                              <Link href={`/submissions/${submission.id}`}>
-                                <Button variant="outline" size="sm">
-                                  View
-                                </Button>
-                              </Link>
+                              {submission.status === 'draft' ? (
+                                <Link href="/request">
+                                  <Button variant="outline" size="sm">
+                                    Continue
+                                  </Button>
+                                </Link>
+                              ) : (
+                                <Link href={`/submissions/${submission.id}`}>
+                                  <Button variant="outline" size="sm">
+                                    View
+                                  </Button>
+                                </Link>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))

@@ -5,7 +5,7 @@
  * Allows users to resume incomplete forms.
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { FormData } from '@/types/form';
@@ -104,8 +104,18 @@ export function useFormPersistence({
   /**
    * Save draft to Firestore
    */
-  const saveDraft = async () => {
+  const saveDraft = useCallback(async () => {
     if (!userId || !enabled) return;
+
+    // Only save draft if required fields are present
+    const hasRequiredFields =
+      formData.requestType &&
+      formData.clientName?.trim() &&
+      formData.requestTitle?.trim();
+
+    if (!hasRequiredFields) {
+      return;
+    }
 
     // Sanitize form data to remove File objects
     const sanitizedData = sanitizeFormData(formData);
@@ -140,7 +150,7 @@ export function useFormPersistence({
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [userId, enabled, formData, userEmail]);
 
   /**
    * Auto-save effect
@@ -164,7 +174,7 @@ export function useFormPersistence({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [formData, userId, userEmail, enabled]);
+  }, [formData, userId, userEmail, enabled, saveDraft]);
 
   /**
    * Save on page unload
