@@ -1,7 +1,9 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  basePath: '/art',
+  // Ensure assets are served from the correct path
+  assetPrefix: '/art',
 };
 
 export default nextConfig;
