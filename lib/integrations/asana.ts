@@ -453,12 +453,9 @@ export async function handleAsanaIntegration(
     await addFollowersToTask(taskId, followersToAdd);
   }
 
-  // Attach individual files if they were uploaded
-  if (uploadedFiles && uploadedFiles.length > 0) {
-    for (const file of uploadedFiles) {
-      await attachUrlToTask(taskId, file.url, file.name);
-    }
-  }
+  // Note: Files are not attached individually to Asana task
+  // All files are already in Google Drive folder which is linked in the task description
+  // and in the Google Folder URL custom field
 
   return { taskId, taskUrl };
 }
