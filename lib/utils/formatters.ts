@@ -162,133 +162,175 @@ function escapeXml(text: string): string {
 export function buildAsanaDescription(formData: FormData): string {
   const sections: string[] = [];
 
-  // Basic Information - use bold text as section headers (Asana doesn't support h1-h6)
-  sections.push('<strong>REQUEST DETAILS</strong>\n');
-  sections.push(
-    `<strong>Request Type:</strong> ${escapeXml(formData.requestType || 'Not specified')}\n`
-  );
-  sections.push(
-    `<strong>Client:</strong> ${escapeXml(formData.clientName || 'Not specified')}\n`
-  );
-  sections.push(
-    `<strong>Request Title:</strong> ${escapeXml(formData.requestTitle || 'Not specified')}\n`
-  );
-  sections.push(
-    `<strong>Region:</strong> ${escapeXml(formData.region || 'Not specified')}\n`
-  );
-  sections.push(
-    `<strong>Submitted By:</strong> ${escapeXml(formData.requestorName || 'Unknown')} (${escapeXml(formData.requestorEmail || 'no-email')})\n`
-  );
+  // Define creative request types (other data is captured in custom fields)
+  const creativeRequestTypes = [
+    'Creative Design Services',
+    'Mockup',
+    'PPTX',
+    'Rise & Shine',
+    'Sneak Peek',
+  ];
+  const isCreativeRequest = creativeRequestTypes.includes(formData.requestType || '');
 
-  if (formData.dueDate) {
-    sections.push(
-      `<strong>Due Date:</strong> ${escapeXml(formData.dueDate)}${formData.dueTime ? ` at ${escapeXml(formData.dueTime)}` : ''}\n`
-    );
-  }
+  if (isCreativeRequest) {
+    // Simplified description for creative requests
+    // Only show: Project Information (Billable, Client Type), Pertinent Information, Website Links
 
-  // Request-specific details
-  if (formData.requestType) {
-    sections.push('\n<strong>REQUEST-SPECIFIC DETAILS</strong>\n');
-
-    switch (formData.requestType) {
-      case 'Mockup':
-        if (formData.mockupType)
-          sections.push(
-            `<strong>Mockup Type:</strong> ${escapeXml(formData.mockupType)}\n`
-          );
-        break;
-      case 'PPTX':
-        if (formData.pptxType)
-          sections.push(`<strong>PPTX Type:</strong> ${escapeXml(formData.pptxType)}\n`);
-        if (formData.numberOfSlides)
-          sections.push(
-            `<strong>Number of Slides:</strong> ${formData.numberOfSlides}\n`
-          );
-        if (formData.presentationStructure) {
-          sections.push(
-            `<strong>Presentation Structure:</strong>\n${escapeXml(formData.presentationStructure).replace(/\n/g, '\n')}\n`
-          );
-        }
-        break;
-      case 'Rise & Shine':
-        if (formData.riseAndShineLevel)
-          sections.push(
-            `<strong>Level:</strong> ${escapeXml(formData.riseAndShineLevel)}\n`
-          );
-        if (formData.numberOfSlides)
-          sections.push(
-            `<strong>Number of Slides:</strong> ${formData.numberOfSlides}\n`
-          );
-        break;
-      case 'Proofs':
-        if (formData.proofType)
-          sections.push(
-            `<strong>Proof Type:</strong> ${escapeXml(formData.proofType)}\n`
-          );
-        break;
-      case 'Sneak Peek':
-        if (formData.sneakPeekOptions) {
-          sections.push(
-            `<strong>Sneak Peek Options:</strong>\n${escapeXml(formData.sneakPeekOptions).replace(/\n/g, '\n')}\n`
-          );
-        }
-        break;
+    // Project Information - Only Billable and Client Type
+    sections.push('<strong>PROJECT INFORMATION</strong>\n');
+    if (formData.billable) {
+      sections.push(`<strong>Billable:</strong> ${escapeXml(formData.billable)}\n`);
     }
-  }
+    if (formData.clientType) {
+      sections.push(`<strong>Client Type:</strong> ${escapeXml(formData.clientType)}\n`);
+    }
 
-  // Products (for Mockup and Proofs requests)
-  if (
-    (formData.requestType === 'Mockup' || formData.requestType === 'Proofs') &&
-    formData.products &&
-    formData.products.length > 0
-  ) {
-    sections.push('\n<strong>PRODUCTS</strong>\n');
-    sections.push(formatProductsHtml(formData.products));
-  }
+    // Pertinent Information - convert TipTap HTML to Asana-compatible HTML
+    if (formData.pertinentInformation) {
+      sections.push('\n<strong>PERTINENT INFORMATION</strong>\n');
+      // Convert TipTap HTML to Asana-compatible format (preserves lists, bold, italic, links)
+      const asanaHtml = convertHtmlForAsana(formData.pertinentInformation);
+      sections.push(`${asanaHtml}\n`);
+    }
 
-  // Project Metadata
-  sections.push('\n<strong>PROJECT INFORMATION</strong>\n');
-  if (formData.projectNumber)
+    // Website Links
+    if (formData.websiteLinks && formData.websiteLinks.length > 0) {
+      sections.push('\n<strong>WEBSITE &amp; SOCIAL LINKS</strong>\n');
+      sections.push(formatWebsiteLinksHtml(formData.websiteLinks));
+    }
+  } else {
+    // Full description for non-creative requests (Proofs, etc.)
+
+    // Basic Information - use bold text as section headers (Asana doesn't support h1-h6)
+    sections.push('<strong>REQUEST DETAILS</strong>\n');
     sections.push(
-      `<strong>Project Number:</strong> ${escapeXml(formData.projectNumber)}\n`
+      `<strong>Request Type:</strong> ${escapeXml(formData.requestType || 'Not specified')}\n`
     );
-  sections.push(
-    `<strong>Project Value:</strong> ${escapeXml(formData.projectValue || 'Not specified')}\n`
-  );
-  sections.push(
-    `<strong>Billable:</strong> ${escapeXml(formData.billable || 'Not specified')}\n`
-  );
-  if (formData.clientType)
-    sections.push(`<strong>Client Type:</strong> ${escapeXml(formData.clientType)}\n`);
-
-  if (formData.labels && formData.labels.length > 0) {
     sections.push(
-      `<strong>Labels:</strong> ${formData.labels.map((l) => escapeXml(l)).join(', ')}\n`
+      `<strong>Client:</strong> ${escapeXml(formData.clientName || 'Not specified')}\n`
     );
-  }
-
-  if (
-    formData.addCollaborators &&
-    formData.collaborators &&
-    formData.collaborators.length > 0
-  ) {
     sections.push(
-      `<strong>Collaborators:</strong> ${formData.collaborators.map((c) => escapeXml(c)).join(', ')}\n`
+      `<strong>Request Title:</strong> ${escapeXml(formData.requestTitle || 'Not specified')}\n`
     );
-  }
+    sections.push(
+      `<strong>Region:</strong> ${escapeXml(formData.region || 'Not specified')}\n`
+    );
+    sections.push(
+      `<strong>Submitted By:</strong> ${escapeXml(formData.requestorName || 'Unknown')} (${escapeXml(formData.requestorEmail || 'no-email')})\n`
+    );
 
-  // Pertinent Information - convert TipTap HTML to Asana-compatible HTML
-  if (formData.pertinentInformation) {
-    sections.push('\n<strong>PERTINENT INFORMATION</strong>\n');
-    // Convert TipTap HTML to Asana-compatible format (preserves lists, bold, italic, links)
-    const asanaHtml = convertHtmlForAsana(formData.pertinentInformation);
-    sections.push(`${asanaHtml}\n`);
-  }
+    if (formData.dueDate) {
+      sections.push(
+        `<strong>Due Date:</strong> ${escapeXml(formData.dueDate)}${formData.dueTime ? ` at ${escapeXml(formData.dueTime)}` : ''}\n`
+      );
+    }
 
-  // Website Links
-  if (formData.websiteLinks && formData.websiteLinks.length > 0) {
-    sections.push('\n<strong>WEBSITE &amp; SOCIAL LINKS</strong>\n');
-    sections.push(formatWebsiteLinksHtml(formData.websiteLinks));
+    // Request-specific details
+    if (formData.requestType) {
+      sections.push('\n<strong>REQUEST-SPECIFIC DETAILS</strong>\n');
+
+      switch (formData.requestType) {
+        case 'Mockup':
+          if (formData.mockupType)
+            sections.push(
+              `<strong>Mockup Type:</strong> ${escapeXml(formData.mockupType)}\n`
+            );
+          break;
+        case 'PPTX':
+          if (formData.pptxType)
+            sections.push(
+              `<strong>PPTX Type:</strong> ${escapeXml(formData.pptxType)}\n`
+            );
+          if (formData.numberOfSlides)
+            sections.push(
+              `<strong>Number of Slides:</strong> ${formData.numberOfSlides}\n`
+            );
+          if (formData.presentationStructure) {
+            sections.push(
+              `<strong>Presentation Structure:</strong>\n${escapeXml(formData.presentationStructure).replace(/\n/g, '\n')}\n`
+            );
+          }
+          break;
+        case 'Rise & Shine':
+          if (formData.riseAndShineLevel)
+            sections.push(
+              `<strong>Level:</strong> ${escapeXml(formData.riseAndShineLevel)}\n`
+            );
+          if (formData.numberOfSlides)
+            sections.push(
+              `<strong>Number of Slides:</strong> ${formData.numberOfSlides}\n`
+            );
+          break;
+        case 'Proofs':
+          if (formData.proofType)
+            sections.push(
+              `<strong>Proof Type:</strong> ${escapeXml(formData.proofType)}\n`
+            );
+          break;
+        case 'Sneak Peek':
+          if (formData.sneakPeekOptions) {
+            sections.push(
+              `<strong>Sneak Peek Options:</strong>\n${escapeXml(formData.sneakPeekOptions).replace(/\n/g, '\n')}\n`
+            );
+          }
+          break;
+      }
+    }
+
+    // Products (for Mockup and Proofs requests)
+    if (
+      (formData.requestType === 'Mockup' || formData.requestType === 'Proofs') &&
+      formData.products &&
+      formData.products.length > 0
+    ) {
+      sections.push('\n<strong>PRODUCTS</strong>\n');
+      sections.push(formatProductsHtml(formData.products));
+    }
+
+    // Project Metadata
+    sections.push('\n<strong>PROJECT INFORMATION</strong>\n');
+    if (formData.projectNumber)
+      sections.push(
+        `<strong>Project Number:</strong> ${escapeXml(formData.projectNumber)}\n`
+      );
+    sections.push(
+      `<strong>Project Value:</strong> ${escapeXml(formData.projectValue || 'Not specified')}\n`
+    );
+    sections.push(
+      `<strong>Billable:</strong> ${escapeXml(formData.billable || 'Not specified')}\n`
+    );
+    if (formData.clientType)
+      sections.push(`<strong>Client Type:</strong> ${escapeXml(formData.clientType)}\n`);
+
+    if (formData.labels && formData.labels.length > 0) {
+      sections.push(
+        `<strong>Labels:</strong> ${formData.labels.map((l) => escapeXml(l)).join(', ')}\n`
+      );
+    }
+
+    if (
+      formData.addCollaborators &&
+      formData.collaborators &&
+      formData.collaborators.length > 0
+    ) {
+      sections.push(
+        `<strong>Collaborators:</strong> ${formData.collaborators.map((c) => escapeXml(c)).join(', ')}\n`
+      );
+    }
+
+    // Pertinent Information - convert TipTap HTML to Asana-compatible HTML
+    if (formData.pertinentInformation) {
+      sections.push('\n<strong>PERTINENT INFORMATION</strong>\n');
+      // Convert TipTap HTML to Asana-compatible format (preserves lists, bold, italic, links)
+      const asanaHtml = convertHtmlForAsana(formData.pertinentInformation);
+      sections.push(`${asanaHtml}\n`);
+    }
+
+    // Website Links
+    if (formData.websiteLinks && formData.websiteLinks.length > 0) {
+      sections.push('\n<strong>WEBSITE &amp; SOCIAL LINKS</strong>\n');
+      sections.push(formatWebsiteLinksHtml(formData.websiteLinks));
+    }
   }
 
   return sections.join('');
