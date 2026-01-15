@@ -9,7 +9,7 @@
 
 import { useFormContext } from 'react-hook-form';
 import { FormData, RequestType } from '@/types/form';
-import { Palette, Image, Presentation, FileCheck, Eye, Sunrise } from 'lucide-react';
+import { Palette, Image, Presentation, FileCheck, Eye } from 'lucide-react';
 
 const requestTypes: Array<{
   value: RequestType;
@@ -46,12 +46,6 @@ const requestTypes: Array<{
     label: 'Sneak Peek',
     description: 'Preview or sneak peek content',
     icon: Eye,
-  },
-  {
-    value: 'Rise & Shine',
-    label: 'Rise & Shine',
-    description: 'Rise & Shine presentation',
-    icon: Sunrise,
   },
 ];
 

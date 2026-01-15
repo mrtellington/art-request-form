@@ -29,16 +29,10 @@ import { CheckCircle, Loader2, Search, ExternalLink, AlertCircle } from 'lucide-
 import { Tooltip } from '@/components/ui/tooltip-simple';
 import { DatePickerEnhanced } from '@/components/ui/date-picker-enhanced';
 import {
-  RISE_AND_SHINE_LEVELS,
-  ASANA_BOARD_URL,
-  FOLLOW_TEMPLATE_URL,
-} from '@/lib/constants/rise-and-shine';
-import {
   MOCKUP_TYPE_OPTIONS,
   PPTX_TYPE_OPTIONS,
   PROOF_TYPE_OPTIONS,
 } from '@/lib/constants/type-options';
-import { PresentationStructure } from '../fields/PresentationStructure';
 import { PPTXRiseAndShineSection } from '../fields/PPTXRiseAndShineSection';
 
 interface ClientResult {
@@ -615,10 +609,6 @@ export function ProjectDetailsStep() {
         </div>
       )}
 
-      {requestType === 'Rise & Shine' && (
-        <RiseAndShineSection watch={watch} setValue={setValue} errors={errors} />
-      )}
-
       {/* Project Number - shown for all types except Sneak Peek */}
       {requestType !== 'Sneak Peek' && (
         <div>
@@ -729,103 +719,6 @@ export function ProjectDetailsStep() {
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-/**
- * Rise & Shine Section Component
- * Shows level-specific messaging and presentation structure
- */
-interface RiseAndShineSectionProps {
-  watch: ReturnType<typeof useFormContext<FormData>>['watch'];
-  setValue: ReturnType<typeof useFormContext<FormData>>['setValue'];
-  errors: ReturnType<typeof useFormContext<FormData>>['formState']['errors'];
-}
-
-function RiseAndShineSection({ watch, setValue, errors }: RiseAndShineSectionProps) {
-  const riseAndShineLevel = watch('riseAndShineLevel');
-  const levelConfig = riseAndShineLevel ? RISE_AND_SHINE_LEVELS[riseAndShineLevel] : null;
-
-  return (
-    <div className="space-y-6">
-      {/* Rise & Shine Level Dropdown */}
-      <div>
-        <Label htmlFor="riseAndShineLevel">
-          Rise & Shine Level <span className="text-red-500">*</span>
-        </Label>
-        <Select
-          value={riseAndShineLevel || undefined}
-          onValueChange={(value) =>
-            setValue('riseAndShineLevel', value as RiseAndShineLevel, {
-              shouldValidate: true,
-            })
-          }
-        >
-          <SelectTrigger id="riseAndShineLevel" className="mt-2">
-            <SelectValue placeholder="Select level" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Bronze">Bronze</SelectItem>
-            <SelectItem value="Silver">Silver</SelectItem>
-            <SelectItem value="Gold">Gold</SelectItem>
-          </SelectContent>
-        </Select>
-        {errors.riseAndShineLevel && (
-          <p className="text-sm text-red-600 mt-2">{errors.riseAndShineLevel.message}</p>
-        )}
-      </div>
-
-      {/* Level-Specific Messaging */}
-      {levelConfig && (
-        <div className="space-y-4 p-4 bg-sky-50 border border-sky-200 rounded-lg">
-          <h3 className="text-lg font-semibold text-sky-800">{levelConfig.title}:</h3>
-
-          <p className="text-sm text-zinc-700">{levelConfig.description}</p>
-
-          <div className="space-y-2">
-            <p className="text-sm text-zinc-600">
-              Look at the{' '}
-              <a
-                href={ASANA_BOARD_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sky-600 hover:text-sky-700 underline inline-flex items-center gap-1"
-              >
-                Asana board
-                <ExternalLink className="w-3 h-3" />
-              </a>{' '}
-              to compose a reasonable deadline.
-            </p>
-
-            <p className="text-sm font-medium text-zinc-700">
-              Video Call REQUIRED -{' '}
-              <a
-                href={FOLLOW_TEMPLATE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sky-600 hover:text-sky-700 underline inline-flex items-center gap-1"
-              >
-                FOLLOW TEMPLATE
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </p>
-          </div>
-
-          <p
-            className={`text-sm font-medium ${levelConfig.eligibilityColor === 'red' ? 'text-red-600' : 'text-sky-600'}`}
-          >
-            {levelConfig.eligibility}
-          </p>
-
-          {levelConfig.extraNote && (
-            <p className="text-sm text-zinc-600 italic">{levelConfig.extraNote}</p>
-          )}
-        </div>
-      )}
-
-      {/* Presentation Structure - Only show when level is selected */}
-      {riseAndShineLevel && <PresentationStructure />}
     </div>
   );
 }
