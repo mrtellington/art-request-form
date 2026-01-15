@@ -22,6 +22,7 @@ import {
   CheckCircle,
   Clock,
 } from 'lucide-react';
+import { Product, WebsiteLink } from '@/types/form';
 
 interface Submission {
   id: string;
@@ -35,8 +36,8 @@ interface Submission {
   requestorEmail: string;
   requestorName?: string;
   pertinentInformation?: string;
-  products?: Array<{ name: string; quantity?: number; sku?: string }>;
-  websiteLinks?: Array<{ url: string; description?: string }>;
+  products?: Product[];
+  websiteLinks?: WebsiteLink[];
   labels?: string[];
   collaborators?: string[];
   status: string;
