@@ -497,23 +497,6 @@ export function ProjectDetailsStep() {
 
       {requestType === 'PPTX' && (
         <div className="space-y-4">
-          {/* Business Development Warning */}
-          <div className="flex items-start gap-3 p-4 rounded-lg border bg-blue-50 border-blue-200">
-            <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-blue-800">
-                Business Development Team Only
-              </p>
-              <p className="text-xs text-blue-700 mt-1">
-                This card should ONLY be used by the Business Development team for new
-                opportunities. These decks will be managed by the Biz Dev team and all
-                require an informative call - the Biz Dev associate should come with ideas
-                on what intro decks should be linked, what opportunities could be
-                available, and thoughts on product to include.
-              </p>
-            </div>
-          </div>
-
           <div>
             <Label htmlFor="pptxType">
               PPTX Type <span className="text-red-500">*</span>
@@ -539,6 +522,44 @@ export function ProjectDetailsStep() {
               <p className="text-sm text-red-600 mt-2">{errors.pptxType.message}</p>
             )}
           </div>
+
+          {/* Business Development Warning - Only for Biz Dev type */}
+          {watch('pptxType') === 'Biz Dev' && (
+            <div className="flex items-start gap-3 p-4 rounded-lg border bg-blue-50 border-blue-200">
+              <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-blue-800">
+                  Business Development Team Only
+                </p>
+                <p className="text-xs text-blue-700 mt-1">
+                  This card should ONLY be used by the Business Development team for new
+                  opportunities. These decks will be managed by the Biz Dev team and all
+                  require an informative call - the Biz Dev associate should come with
+                  ideas on what intro decks should be linked, what opportunities could be
+                  available, and thoughts on product to include.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Pitch Deck Warning - Only for Pitch Deck type */}
+          {watch('pptxType') === 'Pitch Deck' && (
+            <div className="flex items-start gap-3 p-4 rounded-lg border bg-green-50 border-green-200">
+              <AlertCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-green-800">
+                  Sales-Managed Opportunity
+                </p>
+                <p className="text-xs text-green-700 mt-1">
+                  This card should be used when you&apos;re handling an opportunity for a
+                  client directly! Pitch Deck cards are managed by Sales, and should have
+                  clear breakdowns of product and project intention. Give as much detailed
+                  information as possible! If a more specific creative eye is required -
+                  be sure to also tag as CALL NEEDED.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
