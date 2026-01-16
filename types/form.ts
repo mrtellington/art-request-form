@@ -10,7 +10,8 @@ export type RequestType =
   | 'Mockup'
   | 'PPTX'
   | 'Proofs'
-  | 'Sneak Peek';
+  | 'Sneak Peek'
+  | 'Rise & Shine';
 
 export type Region = 'US' | 'CAD' | 'EU' | 'UK' | 'APAC';
 
