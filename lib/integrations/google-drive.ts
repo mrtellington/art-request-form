@@ -207,6 +207,7 @@ export async function uploadFileToDrive(
   folderId: string
 ): Promise<{ fileId: string; fileUrl: string }> {
   try {
+    console.log(`Starting upload for file: ${file.name} to folder: ${folderId}`);
     const drive = getDriveClient();
 
     // Get file buffer from either File object or base64 data
@@ -214,12 +215,15 @@ export async function uploadFileToDrive(
 
     if (file.base64Data) {
       // Decode base64 data to buffer
+      console.log(`Using base64Data for ${file.name} (${file.size} bytes)`);
       buffer = Buffer.from(file.base64Data, 'base64');
     } else if (file.file) {
       // Convert File to Buffer for upload (client-side fallback)
+      console.log(`Using File object for ${file.name}`);
       const arrayBuffer = await file.file.arrayBuffer();
       buffer = Buffer.from(arrayBuffer);
     } else {
+      console.error(`File data missing for ${file.name} - no base64Data or file object`);
       throw new Error('File data is missing - no base64Data or file object');
     }
 
@@ -253,6 +257,7 @@ export async function uploadFileToDrive(
       throw new Error('Failed to upload file to Google Drive');
     }
 
+    console.log(`Successfully uploaded ${file.name} - File ID: ${fileId}`);
     return { fileId, fileUrl };
   } catch (error) {
     console.error(`Error uploading file ${file.name}:`, error);
@@ -334,7 +339,21 @@ export async function handleGoogleDriveIntegration(formData: FormData): Promise<
   // Upload files to Attachments subfolder if any
   let uploadedFiles: Array<{ id: string; name: string; url: string }> = [];
   if (formData.attachments && formData.attachments.length > 0) {
+    console.log(
+      `Uploading ${formData.attachments.length} file(s) to Attachments folder (ID: ${attachmentsFolderId})`
+    );
+    console.log(
+      'Attachment details:',
+      formData.attachments.map((a) => ({
+        name: a.name,
+        hasBase64: !!a.base64Data,
+        size: a.size,
+      }))
+    );
     uploadedFiles = await uploadFilesToDrive(formData.attachments, attachmentsFolderId);
+    console.log(`Successfully uploaded ${uploadedFiles.length} files`);
+  } else {
+    console.log('No attachments to upload');
   }
 
   // Set permissions for collaborators if specified
