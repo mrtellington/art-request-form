@@ -105,7 +105,7 @@ export default function SubmissionDetailPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/submissions/${submissionId}`);
+      const response = await fetch(`/art/api/submissions/${submissionId}`);
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -129,7 +129,7 @@ export default function SubmissionDetailPage() {
       setRetrying(true);
       setError(null);
 
-      const response = await fetch(`/api/submissions/${submissionId}`, {
+      const response = await fetch(`/art/api/submissions/${submissionId}`, {
         method: 'POST',
       });
 

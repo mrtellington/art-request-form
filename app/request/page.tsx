@@ -142,7 +142,7 @@ export default function RequestPage() {
       };
 
       // Call submission API
-      const response = await fetch('/api/submit', {
+      const response = await fetch('/art/api/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

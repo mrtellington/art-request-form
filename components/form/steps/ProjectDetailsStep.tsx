@@ -93,7 +93,7 @@ export function ProjectDetailsStep() {
         setIsSearching(true);
         try {
           const response = await fetch(
-            `/api/search-clients?q=${encodeURIComponent(clientName)}`
+            `/art/api/search-clients?q=${encodeURIComponent(clientName)}`
           );
           const data = await response.json();
 
@@ -140,7 +140,7 @@ export function ProjectDetailsStep() {
       setIsSearching(true);
       try {
         const response = await fetch(
-          `/api/search-clients?q=${encodeURIComponent(clientName)}`
+          `/art/api/search-clients?q=${encodeURIComponent(clientName)}`
         );
         const data = await response.json();
 

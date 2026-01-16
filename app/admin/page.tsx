@@ -105,7 +105,7 @@ export default function AdminDashboard() {
         params.append('status', statusFilter);
       }
 
-      const response = await fetch(`/api/submissions?${params.toString()}`);
+      const response = await fetch(`/art/api/submissions?${params.toString()}`);
       const data = await response.json();
 
       if (!response.ok || !data.success) {

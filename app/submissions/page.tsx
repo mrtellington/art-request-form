@@ -96,7 +96,7 @@ export default function MySubmissionsPage() {
       const params = new URLSearchParams();
       params.append('email', user.email);
 
-      const response = await fetch(`/api/submissions?${params.toString()}`);
+      const response = await fetch(`/art/api/submissions?${params.toString()}`);
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -121,7 +121,7 @@ export default function MySubmissionsPage() {
       setDeletingId(draftId);
       setError(null);
 
-      const response = await fetch(`/api/drafts/${draftId}`, {
+      const response = await fetch(`/art/api/drafts/${draftId}`, {
         method: 'DELETE',
       });
 

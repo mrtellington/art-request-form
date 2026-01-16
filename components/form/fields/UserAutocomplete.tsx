@@ -63,7 +63,9 @@ export function UserAutocomplete({
     const timer = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/search-users?q=${encodeURIComponent(query)}`);
+        const response = await fetch(
+          `/art/api/search-users?q=${encodeURIComponent(query)}`
+        );
         const result = await response.json();
 
         if (result.success) {
