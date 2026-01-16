@@ -12,9 +12,10 @@ import { signInWithGoogle, signOut } from '@/lib/firebase/auth';
 import { Button } from '@/components/ui/button';
 import { FormContainer } from '@/components/form/FormContainer';
 import { FormData, FileAttachment } from '@/types/form';
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { SearchParamsHandler } from '@/components/SearchParamsHandler';
 
 /**
  * Convert a File object to base64 string
@@ -64,8 +65,6 @@ export default function RequestPage() {
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const draftId = searchParams.get('draftId') || undefined;
 
   const handleSignIn = async () => {
     setSigningIn(true);
@@ -127,7 +126,7 @@ export default function RequestPage() {
   }
 
   // Handle form submission
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (formData: FormData, draftId?: string) => {
     try {
       // Process attachments to convert File objects to base64
       const processedAttachments = formData.attachments
@@ -203,13 +202,25 @@ export default function RequestPage() {
         </div>
 
         {/* Form Container */}
-        <FormContainer
-          onSubmit={handleSubmit}
-          userId={user.uid}
-          userEmail={user.email || ''}
-          userName={user.displayName || ''}
-          draftId={draftId}
-        />
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+            </div>
+          }
+        >
+          <SearchParamsHandler>
+            {(draftId) => (
+              <FormContainer
+                onSubmit={(formData) => handleSubmit(formData, draftId)}
+                userId={user.uid}
+                userEmail={user.email || ''}
+                userName={user.displayName || ''}
+                draftId={draftId}
+              />
+            )}
+          </SearchParamsHandler>
+        </Suspense>
       </div>
     </div>
   );
