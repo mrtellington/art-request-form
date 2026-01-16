@@ -12,7 +12,7 @@ import { FormData } from '@/types/form';
 export async function GET() {
   try {
     // Create test form data
-    const testFormData: FormData = {
+    const testFormData: Partial<FormData> = {
       requestType: 'Creative Design Services',
       clientName: 'Test Client Inc.',
       requestTitle: 'Test Art Request - Slack Error Notification',

@@ -12,7 +12,7 @@ import { FormData } from '@/types/form';
  */
 export async function sendSlackErrorNotification(
   error: Error,
-  formData: FormData,
+  formData: Partial<FormData>,
   step: string,
   submissionId?: string
 ): Promise<void> {

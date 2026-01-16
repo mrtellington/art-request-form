@@ -13,7 +13,7 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.searchParams;
+    const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get('type') || 'success';
 
     if (type === 'success') {
