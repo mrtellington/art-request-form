@@ -16,36 +16,36 @@ import {
 
 /**
  * Asana Custom Field GIDs
- * Retrieved from Testing Art Requests project (also same in Art Request production)
+ * Retrieved from Art Requests production project (ID: 1211223909834951)
  */
 const ASANA_CUSTOM_FIELDS = {
-  // Request Type (enum)
-  REQUEST_TYPE: '1212723982330507',
+  // Request Type (enum) - called "Request" in Asana
+  REQUEST_TYPE: '1211551541910237',
   REQUEST_TYPE_OPTIONS: {
-    'Creative Design Services': '1212723982330508',
-    Mockup: '1212723982330509',
-    PPTX: '1212723982330510',
-    Proofs: '1212723982330511',
-    'Sneak Peek': '1212723982330512',
-    // Note: "Rise & Shine" not in Asana enum - may need to be added
+    'Creative Design Services': '1211551541910239',
+    Mockup: '1211551541910241',
+    PPTX: '1211551541910242',
+    Proofs: '1211551541910243',
+    'Sneak Peek': '1211551541910244',
+    // Note: "Rise & Shine" options exist but are disabled in Asana
   } as Record<string, string>,
 
   // Client (text)
-  CLIENT: '1212723982330523',
+  CLIENT: '1211551542058961',
 
   // Billable (enum)
-  BILLABLE: '1212723982330529',
+  BILLABLE: '1211551542058970',
   BILLABLE_OPTIONS: {
-    Yes: '1212723982330530',
-    No: '1212723982330531',
+    Yes: '1211551542058971',
+    No: '1211551542058972',
   } as Record<string, string>,
 
   // Value/Project Value (enum)
-  VALUE: '1212723980470386',
+  VALUE: '1211551542058988',
   VALUE_OPTIONS: {
-    '<$50k': '1212723980470387',
-    '$50k-$250k': '1212723980470388',
-    '>$250k': '1212723980470389',
+    '<$50k': '1211551542058989',
+    '$50k-$250k': '1211551542058990',
+    '>$250k': '1211551542058991',
   } as Record<string, string>,
 
   // Region (enum)
