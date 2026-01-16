@@ -64,9 +64,10 @@ export function useFormPersistence({
         if (obj instanceof File || obj instanceof Blob) return null;
 
         const cleaned: Record<string, unknown> = {};
-        for (const key in obj) {
-          if (obj.hasOwnProperty(key)) {
-            const value = obj[key];
+        const objRecord = obj as Record<string, unknown>;
+        for (const key in objRecord) {
+          if (objRecord.hasOwnProperty(key)) {
+            const value = objRecord[key];
 
             // Skip 'file' property (File objects from FileAttachment)
             if (key === 'file') continue;

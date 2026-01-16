@@ -415,7 +415,7 @@ export function ProjectDetailsStep() {
           </Label>
           {watch('requestTitle') && (
             <span className="text-xs text-zinc-500">
-              {watch('requestTitle').length} characters
+              {watch('requestTitle')?.length || 0} characters
             </span>
           )}
         </div>
@@ -430,9 +430,9 @@ export function ProjectDetailsStep() {
             placeholder="e.g., Water Bottle Mockup for Q1 Campaign"
             className={`pr-10 ${errors.requestTitle ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
           />
-          {watch('requestTitle') && watch('requestTitle').length > 0 && (
+          {watch('requestTitle') && (watch('requestTitle')?.length || 0) > 0 && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {watch('requestTitle').length > 5 ? (
+              {(watch('requestTitle')?.length || 0) > 5 ? (
                 <CheckCircle className="w-5 h-5 text-green-600" />
               ) : (
                 <AlertCircle className="w-5 h-5 text-amber-500" />
@@ -452,8 +452,8 @@ export function ProjectDetailsStep() {
             {errors.requestTitle.message}
           </p>
         ) : watch('requestTitle') &&
-          watch('requestTitle').length > 0 &&
-          watch('requestTitle').length < 6 ? (
+          (watch('requestTitle')?.length || 0) > 0 &&
+          (watch('requestTitle')?.length || 0) < 6 ? (
           <p className="text-sm text-amber-600 mt-2 flex items-center gap-1">
             <AlertCircle className="w-4 h-4" />
             Consider adding more detail to your title
@@ -661,7 +661,7 @@ export function ProjectDetailsStep() {
           <div className="mt-2">
             <DatePickerEnhanced
               id="dueDate"
-              value={watch('dueDate')}
+              value={watch('dueDate') ?? undefined}
               onChange={(value) => setValue('dueDate', value, { shouldValidate: true })}
               error={errors.dueDate?.message}
             />

@@ -85,9 +85,10 @@ export async function POST(request: NextRequest) {
           if (obj instanceof File || obj instanceof Blob) return null;
 
           const cleaned: Record<string, unknown> = {};
-          for (const key in obj) {
-            if (obj.hasOwnProperty(key)) {
-              const value = obj[key];
+          const objRecord = obj as Record<string, unknown>;
+          for (const key in objRecord) {
+            if (objRecord.hasOwnProperty(key)) {
+              const value = objRecord[key];
 
               // Skip undefined and 'file' properties (File objects from FileAttachment)
               if (value === undefined || key === 'file') {
@@ -146,17 +147,17 @@ export async function POST(request: NextRequest) {
       };
 
       // Clean the entire data structure
-      const cleaned = cleanObject(data);
+      const cleaned = cleanObject(data) as Record<string, unknown>;
 
       // Ensure critical arrays are present (even if empty) and properly structured
       return {
         ...cleaned,
-        attachments: Array.isArray(cleaned.attachments) ? cleaned.attachments : [],
-        slides: Array.isArray(cleaned.slides) ? cleaned.slides : [],
-        products: Array.isArray(cleaned.products) ? cleaned.products : [],
-        websiteLinks: Array.isArray(cleaned.websiteLinks) ? cleaned.websiteLinks : [],
-        collaborators: Array.isArray(cleaned.collaborators) ? cleaned.collaborators : [],
-        labels: Array.isArray(cleaned.labels) ? cleaned.labels : [],
+        attachments: Array.isArray(cleaned?.attachments) ? cleaned.attachments : [],
+        slides: Array.isArray(cleaned?.slides) ? cleaned.slides : [],
+        products: Array.isArray(cleaned?.products) ? cleaned.products : [],
+        websiteLinks: Array.isArray(cleaned?.websiteLinks) ? cleaned.websiteLinks : [],
+        collaborators: Array.isArray(cleaned?.collaborators) ? cleaned.collaborators : [],
+        labels: Array.isArray(cleaned?.labels) ? cleaned.labels : [],
       };
     };
 
@@ -338,12 +339,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Delete the draft after successful submission
-    // @ts-expect-error - draftId is passed in submission data but not in FormData type
     if (body.draftId) {
       try {
-        // @ts-expect-error - draftId is passed in submission data but not in FormData type
         await db.collection('drafts').doc(body.draftId).delete();
-        // @ts-expect-error - draftId is passed in submission data but not in FormData type
         console.log('Draft deleted:', body.draftId);
       } catch (draftError) {
         // Log error but don't fail the submission

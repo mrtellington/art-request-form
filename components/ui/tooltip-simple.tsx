@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { Info } from 'lucide-react';
 
 interface TooltipProps {
-  content: string;
+  content: React.ReactNode;
   children?: React.ReactNode;
 }
 
@@ -26,7 +26,7 @@ export function Tooltip({ content, children }: TooltipProps) {
         onFocus={() => setShow(true)}
         onBlur={() => setShow(false)}
         className="inline-flex items-center justify-center text-zinc-400 hover:text-zinc-600 transition-colors"
-        aria-label={content}
+        aria-label={typeof content === 'string' ? content : 'More information'}
       >
         {children || <Info className="w-4 h-4" />}
       </button>
