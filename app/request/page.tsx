@@ -15,6 +15,7 @@ import { FormData, FileAttachment } from '@/types/form';
 import { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { SearchParamsHandler } from '@/components/SearchParamsHandler';
 import { getApiPath } from '@/lib/api-base-path';
 
@@ -97,6 +98,15 @@ export default function RequestPage() {
       <div className="flex min-h-screen items-center justify-center bg-zinc-50">
         <div className="max-w-md w-full mx-4">
           <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            <div className="flex justify-center mb-6">
+              <Image
+                src="/logo.svg"
+                alt="Whitestone Branding Logo"
+                width={200}
+                height={60}
+                priority
+              />
+            </div>
             <h1 className="text-3xl font-bold text-midnight mb-2">Art Request Form</h1>
             <p className="text-zinc-600 mb-6">
               Sign in with your @whitestonebranding.com account to submit art requests.
