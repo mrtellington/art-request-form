@@ -12,16 +12,19 @@ const figtree = Figtree({
   display: 'swap',
 });
 
+// Get base path for production
+const basePath = process.env.NODE_ENV === 'production' ? '/art' : '';
+
 export const metadata: Metadata = {
   title: 'Art Request Form | Whitestone Branding',
   description:
     'Submit art requests for design services, mockups, presentations, proofs, and more.',
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: '32x32' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: `${basePath}/favicon.ico`, sizes: '32x32' },
+      { url: `${basePath}/favicon.svg`, type: 'image/svg+xml' },
     ],
-    apple: '/logo.png',
+    apple: `${basePath}/logo.png`,
   },
 };
 
