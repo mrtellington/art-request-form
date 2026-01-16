@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/art/api/sync-clients",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

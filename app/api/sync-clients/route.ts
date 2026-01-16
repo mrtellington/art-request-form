@@ -99,11 +99,13 @@ async function fetchAllClientsFromCommonSKU(): Promise<CommonSKUClient[]> {
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify auth token (for cron job security)
+    // Verify auth token OR Vercel Cron header
     const authHeader = request.headers.get('Authorization');
     const token = authHeader?.replace('Bearer ', '');
+    const isVercelCron = request.headers.get('x-vercel-cron') === '1';
 
-    if (SYNC_AUTH_TOKEN && token !== SYNC_AUTH_TOKEN) {
+    // Allow either valid auth token or Vercel Cron requests
+    if (!isVercelCron && SYNC_AUTH_TOKEN && token !== SYNC_AUTH_TOKEN) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -141,13 +141,34 @@ If custom field IDs need to be updated:
 
 The app caches CommonSKU clients in Firestore for faster autocomplete.
 
-### Syncing Clients
+### Automatic Client Sync
 
-To refresh the client cache:
+Clients are automatically synced from CommonSKU **daily at midnight UTC** via Vercel Cron.
 
-1. Visit: https://request.whitestonebranding.com/art/api/sync-clients
-2. Clients are synced from CommonSKU API to Firestore
-3. Cache is used by the client name autocomplete
+Configuration in `vercel.json`:
+
+```json
+{
+  "crons": [
+    {
+      "path": "/art/api/sync-clients",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
+```
+
+### Manual Client Sync
+
+To manually trigger a sync (e.g., after adding new clients to CommonSKU):
+
+**Check sync status:**
+
+Visit: https://request.whitestonebranding.com/art/api/sync-clients
+
+**Trigger manual sync:**
+
+Make a POST request with auth token (requires `SYNC_AUTH_TOKEN` environment variable)
 
 ## Troubleshooting
 
