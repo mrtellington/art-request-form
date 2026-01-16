@@ -8,6 +8,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import {
+  sendSlackCronSuccessNotification,
+  sendSlackCronErrorNotification,
+} from '@/lib/integrations/slack';
 
 const COMMONSKU_API_KEY = process.env.COMMONSKU_API_KEY;
 const COMMONSKU_BASE_URL =
@@ -98,6 +102,8 @@ async function fetchAllClientsFromCommonSKU(): Promise<CommonSKUClient[]> {
  * Protected by auth token
  */
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
     // Verify auth token OR Vercel Cron header
     const authHeader = request.headers.get('Authorization');
@@ -149,15 +155,25 @@ export async function POST(request: NextRequest) {
       status: 'success',
     });
 
+    const syncDuration = (Date.now() - startTime) / 1000;
     console.log('Client sync completed successfully');
+
+    // Send success notification to Slack
+    await sendSlackCronSuccessNotification(commonskuClients.length, syncDuration);
 
     return NextResponse.json({
       success: true,
       clientCount: commonskuClients.length,
       message: 'Clients synced successfully',
+      duration: syncDuration,
     });
   } catch (error) {
     console.error('Client sync failed:', error);
+
+    // Send error notification to Slack
+    await sendSlackCronErrorNotification(
+      error instanceof Error ? error : new Error('Unknown error')
+    );
 
     // Log error to metadata
     try {

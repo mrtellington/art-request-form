@@ -100,6 +100,20 @@ Environment variables are configured in Vercel dashboard:
 - `ASANA_WORKSPACE_ID=1201405786124364` - Production workspace
 - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=requests-9d412.firebaseapp.com` - Must use Firebase domain for OAuth
 
+#### Slack Webhooks
+
+- `SLACK_TECH_ALERT_WEBHOOK` - Channel webhook for form submission errors (tech-alert channel)
+- `SLACK_SUCCESS_WEBHOOK` - Optional channel webhook for successful form submissions
+- `SLACK_CRON_SUCCESS_WEBHOOK` - Personal DM webhook for cron job success/error notifications
+
+To set up Slack webhooks:
+
+1. Go to your Slack workspace → Apps → Incoming Webhooks
+2. Create webhooks for:
+   - Channel #tech-alert (for errors)
+   - Your personal DM (for cron job notifications)
+3. Add webhook URLs to Vercel environment variables
+
 ## Firebase Authentication
 
 ### OAuth Domain Configuration
@@ -169,6 +183,35 @@ Visit: https://request.whitestonebranding.com/art/api/sync-clients
 **Trigger manual sync:**
 
 Make a POST request with auth token (requires `SYNC_AUTH_TOKEN` environment variable)
+
+## Slack Notifications
+
+The app sends Slack notifications for various events:
+
+### Error Notifications (tech-alert channel)
+
+Sent when form submissions fail at any step (Asana, Google Drive, etc.):
+
+- Error message and stack trace
+- Submission details (client, request type, submitter)
+- Link to admin dashboard
+- **Webhook**: `SLACK_TECH_ALERT_WEBHOOK`
+
+### Cron Job Notifications (Personal DM)
+
+Sent after the daily client sync cron job completes:
+
+- **Success**: Number of clients synced, sync duration, timestamp
+- **Failure**: Error message and timestamp
+- **Webhook**: `SLACK_CRON_SUCCESS_WEBHOOK`
+
+### Success Notifications (Optional)
+
+Can be enabled for successful form submissions:
+
+- Client name, request type, submitter
+- Links to Asana task and Google Drive folder
+- **Webhook**: `SLACK_SUCCESS_WEBHOOK` (currently disabled)
 
 ## Troubleshooting
 

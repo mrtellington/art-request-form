@@ -187,3 +187,125 @@ export async function sendSlackSuccessNotification(
     // Don't throw - Slack notifications are not critical
   }
 }
+
+/**
+ * Send cron job success notification to personal Slack DM
+ */
+export async function sendSlackCronSuccessNotification(
+  clientCount: number,
+  syncDuration: number
+): Promise<void> {
+  try {
+    const webhookUrl = process.env.SLACK_CRON_SUCCESS_WEBHOOK;
+
+    if (!webhookUrl) {
+      console.log('SLACK_CRON_SUCCESS_WEBHOOK not configured, skipping notification');
+      return;
+    }
+
+    const message = {
+      blocks: [
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: '✅ Client Sync Completed',
+            emoji: true,
+          },
+        },
+        {
+          type: 'section',
+          fields: [
+            {
+              type: 'mrkdwn',
+              text: `*Clients Synced:*\n${clientCount.toLocaleString()}`,
+            },
+            {
+              type: 'mrkdwn',
+              text: `*Duration:*\n${syncDuration.toFixed(1)}s`,
+            },
+            {
+              type: 'mrkdwn',
+              text: `*Timestamp:*\n${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })} EST`,
+            },
+            {
+              type: 'mrkdwn',
+              text: `*Status:*\n✅ Success`,
+            },
+          ],
+        },
+      ],
+    };
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(message),
+    });
+
+    if (!response.ok) {
+      console.error('Failed to send Slack cron notification:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error sending Slack cron notification:', error);
+    // Don't throw - Slack notifications are not critical
+  }
+}
+
+/**
+ * Send cron job error notification to personal Slack DM
+ */
+export async function sendSlackCronErrorNotification(error: Error): Promise<void> {
+  try {
+    const webhookUrl = process.env.SLACK_CRON_SUCCESS_WEBHOOK;
+
+    if (!webhookUrl) {
+      return;
+    }
+
+    const message = {
+      blocks: [
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: '🚨 Client Sync Failed',
+            emoji: true,
+          },
+        },
+        {
+          type: 'section',
+          fields: [
+            {
+              type: 'mrkdwn',
+              text: `*Timestamp:*\n${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })} EST`,
+            },
+            {
+              type: 'mrkdwn',
+              text: `*Status:*\n❌ Failed`,
+            },
+          ],
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*Error Message:*\n\`\`\`${error.message}\`\`\``,
+          },
+        },
+      ],
+    };
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(message),
+    });
+
+    if (!response.ok) {
+      console.error('Failed to send Slack cron error notification:', response.statusText);
+    }
+  } catch (err) {
+    console.error('Error sending Slack cron error notification:', err);
+  }
+}
