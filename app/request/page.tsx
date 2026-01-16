@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { SearchParamsHandler } from '@/components/SearchParamsHandler';
-import { getApiPath } from '@/lib/api-base-path';
+import { getApiPath, getAssetPath } from '@/lib/api-base-path';
 
 /**
  * Convert a File object to base64 string
@@ -100,7 +100,7 @@ export default function RequestPage() {
           <div className="bg-white rounded-lg shadow-lg p-8 text-center">
             <div className="flex justify-center mb-6">
               <Image
-                src="/logo.svg"
+                src={getAssetPath('/logo.svg')}
                 alt="Whitestone Branding Logo"
                 width={200}
                 height={60}
