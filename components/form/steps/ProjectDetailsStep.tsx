@@ -34,6 +34,7 @@ import {
   PROOF_TYPE_OPTIONS,
 } from '@/lib/constants/type-options';
 import { PPTXRiseAndShineSection } from '../fields/PPTXRiseAndShineSection';
+import { getApiPath } from '@/lib/api-base-path';
 
 interface ClientResult {
   id: string;
@@ -93,7 +94,7 @@ export function ProjectDetailsStep() {
         setIsSearching(true);
         try {
           const response = await fetch(
-            `/art/api/search-clients?q=${encodeURIComponent(clientName)}`
+            getApiPath(`/api/search-clients?q=${encodeURIComponent(clientName)}`)
           );
           const data = await response.json();
 
@@ -140,7 +141,7 @@ export function ProjectDetailsStep() {
       setIsSearching(true);
       try {
         const response = await fetch(
-          `/art/api/search-clients?q=${encodeURIComponent(clientName)}`
+          getApiPath(`/api/search-clients?q=${encodeURIComponent(clientName)}`)
         );
         const data = await response.json();
 

@@ -16,6 +16,7 @@ import { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { SearchParamsHandler } from '@/components/SearchParamsHandler';
+import { getApiPath } from '@/lib/api-base-path';
 
 /**
  * Convert a File object to base64 string
@@ -142,7 +143,7 @@ export default function RequestPage() {
       };
 
       // Call submission API
-      const response = await fetch('/art/api/submit', {
+      const response = await fetch(getApiPath('/api/submit'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

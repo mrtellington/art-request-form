@@ -11,6 +11,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Loader2, UserPlus } from 'lucide-react';
+import { getApiPath } from '@/lib/api-base-path';
 
 interface AsanaUser {
   gid: string;
@@ -64,7 +65,7 @@ export function UserAutocomplete({
       setIsLoading(true);
       try {
         const response = await fetch(
-          `/art/api/search-users?q=${encodeURIComponent(query)}`
+          getApiPath(`/api/search-users?q=${encodeURIComponent(query)}`)
         );
         const result = await response.json();
 

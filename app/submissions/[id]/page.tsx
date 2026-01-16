@@ -12,6 +12,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/firebase/AuthContext';
 import { signOut } from '@/lib/firebase/auth';
+import { getApiPath } from '@/lib/api-base-path';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -117,7 +118,7 @@ export default function SubmissionDetailPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/art/api/submissions/${submissionId}`);
+      const response = await fetch(getApiPath(`/api/submissions/${submissionId}`));
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -141,7 +142,7 @@ export default function SubmissionDetailPage() {
       setRetrying(true);
       setError(null);
 
-      const response = await fetch(`/art/api/submissions/${submissionId}`, {
+      const response = await fetch(getApiPath(`/api/submissions/${submissionId}`), {
         method: 'POST',
       });
 

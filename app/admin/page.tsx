@@ -9,6 +9,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
+import { getApiPath } from '@/lib/api-base-path';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -105,7 +106,7 @@ export default function AdminDashboard() {
         params.append('status', statusFilter);
       }
 
-      const response = await fetch(`/art/api/submissions?${params.toString()}`);
+      const response = await fetch(getApiPath(`/api/submissions?${params.toString()}`));
       const data = await response.json();
 
       if (!response.ok || !data.success) {

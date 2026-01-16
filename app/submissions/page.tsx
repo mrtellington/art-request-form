@@ -9,6 +9,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/firebase/AuthContext';
 import { signOut } from '@/lib/firebase/auth';
+import { getApiPath } from '@/lib/api-base-path';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SkeletonTable } from '@/components/ui/skeleton';
@@ -96,7 +97,7 @@ export default function MySubmissionsPage() {
       const params = new URLSearchParams();
       params.append('email', user.email);
 
-      const response = await fetch(`/art/api/submissions?${params.toString()}`);
+      const response = await fetch(getApiPath(`/api/submissions?${params.toString()}`));
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -121,7 +122,7 @@ export default function MySubmissionsPage() {
       setDeletingId(draftId);
       setError(null);
 
-      const response = await fetch(`/art/api/drafts/${draftId}`, {
+      const response = await fetch(getApiPath(`/api/drafts/${draftId}`), {
         method: 'DELETE',
       });
 
